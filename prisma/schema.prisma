@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  username      String   @unique
+  password      String?
+  image         String?
+  role          Role     @default(USER)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  markets       Market[] // Si es MARKET_MANAGER
+  comments      Comment[]
+}
+
+model Market {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  location    String
+  image       String?
+  manager     User     @relation(fields: [managerId], references: [id])
+  managerId   String
+  products    Product[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  quantity    Int
+  image       String?
+  isAvailable Boolean  @default(true)
+  sasProgram  Boolean  @default(false)
+  market      Market   @relation(fields: [marketId], references: [id])
+  marketId    String
+  category    ProductCategory @default(OTRO)
+  comments    Comment[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  baseProduct   ProductBase? @relation(fields: [baseProductId], references: [id])
+  baseProductId String?
+
+}
+
+model ProductBase {
+  id         String           @id @default(cuid())
+  name       String
+  image      String
+  category   ProductCategory  @default(OTRO)
+  nutrition  String
+  products   Product[]
+}
+
+
+
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  rating    Int      // 1 to 5
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  USER
+  MARKET_MANAGER
+  ADMIN
+}
+
+enum ProductCategory {
+  FRUTA
+  HORTALIZA
+  VIANDA
+  CARNE_EMBUTIDO
+  OTRO
+}
