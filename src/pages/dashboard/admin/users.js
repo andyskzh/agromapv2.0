@@ -62,104 +62,127 @@ export default function AdminUsers() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-green-900 mb-4">👥 Gestión de Usuarios</h1>
+      <h1 className="text-3xl font-bold text-green-900 mb-6">👥 Gestión de Usuarios</h1>
 
       <button
         onClick={() => setShowForm(!showForm)}
-        className="mb-4 bg-green-700 text-white px-4 py-2 rounded"
+        className="mb-6 bg-green-700 text-white px-6 py-3 rounded-lg hover:bg-green-800 transition-colors duration-200"
       >
-        {showForm ? "Cancelar" : "➕ Añadir Usuario"}
+        {showForm ? "❌ Cancelar" : "➕ Añadir Usuario"}
       </button>
 
       {showForm && (
-        <form onSubmit={handleAddUser} className="space-y-4 mb-6 bg-white p-4 rounded shadow">
+        <form 
+          onSubmit={handleAddUser} 
+          className="space-y-4 mb-8 bg-white p-6 rounded-xl shadow-md border border-gray-100"
+        >
           <div>
-            <label className="block text-sm font-semibold">Nombre completo</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
             <input
               type="text"
               required
-              className="w-full border rounded p-2"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               value={newUser.name}
               onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold">Usuario</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
             <input
               type="text"
               required
-              className="w-full border rounded p-2"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               value={newUser.username}
               onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold">Contraseña</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
             <input
               type="password"
               required
-              className="w-full border rounded p-2"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               value={newUser.password}
               onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold">Rol</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
             <select
-  className="w-full border rounded p-2"
-  value={newUser.role}
-  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
->
-  <option value="USER">USER</option>
-  <option value="MARKET_MANAGER">MARKET_MANAGER</option>
-  <option value="ADMIN">ADMIN</option>
-</select>
-
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              value={newUser.role}
+              onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+            >
+              <option value="USER">Usuario</option>
+              <option value="MARKET_MANAGER">Gestor de Mercado</option>
+              <option value="ADMIN">Administrador</option>
+            </select>
           </div>
-          <button className="bg-green-600 text-white px-4 py-2 rounded">Crear</button>
+          <button
+            type="submit"
+            className="w-full bg-green-700 text-white px-4 py-3 rounded-lg hover:bg-green-800 transition-colors duration-200"
+          >
+            Crear Usuario
+          </button>
         </form>
       )}
 
-      <table className="w-full bg-white border shadow-sm rounded">
-        <thead className="bg-green-100 text-green-900 text-left">
-          <tr>
-            <th className="p-3">Nombre</th>
-            <th className="p-3">Usuario</th>
-            <th className="p-3">Rol</th>
-            <th className="p-3">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((u) => (
-            <tr key={u.id} className="border-b hover:bg-gray-50">
-              <td className="p-3">{u.name}</td>
-              <td className="p-3">{u.username}</td>
-              <td className="p-3">
-              <select
-  value={u.role}
-  onChange={(e) => handleRoleChange(u.id, e.target.value)}
-  className="border rounded px-2 py-1"
->
-  <option value="USER">USER</option>
-  <option value="MARKET_MANAGER">MARKET_MANAGER</option>
-  <option value="ADMIN">ADMIN</option>
-</select>
-
-              </td>
-              <td className="p-3">
-                {u.id !== session.user.id && (
-                  <button
-                    onClick={() => handleDelete(u.id)}
-                    className="text-red-600 hover:underline"
-                  >
-                    Eliminar
-                  </button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {loading ? (
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-700"></div>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-100">
+            <thead className="bg-green-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-100">
+              {users.map((user) => (
+                <tr key={user.id} className="hover:bg-gray-50 transition-colors duration-200">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.username}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      user.role === 'ADMIN' ? 'bg-green-100 text-green-800' : 
+                      user.role === 'MARKET_MANAGER' ? 'bg-yellow-100 text-yellow-800' : 
+                      'bg-blue-100 text-blue-800'
+                    }`}>
+                      {user.role === 'ADMIN' ? 'Administrador' : 
+                       user.role === 'MARKET_MANAGER' ? 'Gestor de Mercado' : 
+                       'Usuario'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <div className="flex space-x-2">
+                      <select
+                        value={user.role}
+                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                        className="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      >
+                        <option value="USER">Usuario</option>
+                        <option value="MARKET_MANAGER">Gestor de Mercado</option>
+                        <option value="ADMIN">Administrador</option>
+                      </select>
+                      <button
+                        onClick={() => handleDelete(user.id)}
+                        className="px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-200 text-sm"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
