@@ -4,10 +4,9 @@ import { useRouter } from "next/router";
 export default function CreateProductAdmin() {
   const router = useRouter();
 
-  const [form, setForm] = useState({
+  const [formData, setFormData] = useState({
     name: "",
     description: "",
-    nutrition: "",
     quantity: "",
     unit: "kg",
     price: "",
@@ -17,7 +16,7 @@ export default function CreateProductAdmin() {
     sasProgram: false,
     marketId: "",
     baseProductId: "",
-    image: "",
+    image: null,
   });
 
   const [markets, setMarkets] = useState([]);
@@ -69,7 +68,7 @@ export default function CreateProductAdmin() {
     const { name, value, type, checked, files } = e.target;
 
     if (type === "checkbox") {
-      setForm({ ...form, [name]: checked });
+      setFormData({ ...formData, [name]: checked });
     } else if (type === "file") {
       // Manejar la subida de imágenes
       if (files && files.length > 0) {
@@ -78,34 +77,35 @@ export default function CreateProductAdmin() {
 
         reader.onloadend = () => {
           setPreviewImage(reader.result);
-          setForm({ ...form, image: reader.result });
+          setFormData({ ...formData, image: reader.result });
         };
 
         reader.readAsDataURL(file);
       }
     } else {
-      setForm({ ...form, [name]: value });
+      setFormData({ ...formData, [name]: value });
     }
   };
 
   const handleBaseProductChange = (e) => {
-    const baseProductId = e.target.value;
-    setForm({ ...form, baseProductId });
+    const selectedBaseProductId = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      baseProductId: selectedBaseProductId,
+    }));
 
-    if (baseProductId) {
+    if (selectedBaseProductId) {
       const selectedBaseProduct = baseProducts.find(
-        (bp) => bp.id === baseProductId
+        (bp) => bp.id === selectedBaseProductId
       );
       if (selectedBaseProduct) {
-        setForm({
-          ...form,
-          baseProductId,
+        setFormData((prev) => ({
+          ...prev,
           name: selectedBaseProduct.name,
+          description: `Información nutricional: ${selectedBaseProduct.nutrition}\n\n${prev.description}`,
           category: selectedBaseProduct.category,
-          nutrition: selectedBaseProduct.nutrition,
           image: selectedBaseProduct.image,
-        });
-        setPreviewImage(selectedBaseProduct.image);
+        }));
       }
     }
   };
@@ -119,7 +119,7 @@ export default function CreateProductAdmin() {
       const res = await fetch("/api/admin/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(formData),
       });
 
       const data = await res.json();
@@ -152,26 +152,26 @@ export default function CreateProductAdmin() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Producto Base */}
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Producto Base (opcional)
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
+            Producto Base
           </label>
           <select
             name="baseProductId"
-            value={form.baseProductId}
+            value={formData.baseProductId}
             onChange={handleBaseProductChange}
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           >
-            <option value="">Selecciona un producto base</option>
-            {baseProducts.map((bp) => (
-              <option key={bp.id} value={bp.id}>
-                {bp.name}
+            <option value="">Seleccione un producto base (opcional)</option>
+            {baseProducts.map((baseProduct) => (
+              <option key={baseProduct.id} value={baseProduct.id}>
+                {baseProduct.name}
               </option>
             ))}
           </select>
           <p className="text-sm text-gray-500 mt-1">
-            Al seleccionar un producto base, se completarán automáticamente
-            algunos campos.
+            Al seleccionar un producto base, se copiará su información
+            nutricional en la descripción
           </p>
         </div>
 
@@ -182,7 +182,7 @@ export default function CreateProductAdmin() {
           </label>
           <select
             name="marketId"
-            value={form.marketId}
+            value={formData.marketId}
             onChange={handleChange}
             required
             className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -204,7 +204,7 @@ export default function CreateProductAdmin() {
           <input
             type="text"
             name="name"
-            value={form.name}
+            value={formData.name}
             onChange={handleChange}
             required
             className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -212,30 +212,17 @@ export default function CreateProductAdmin() {
         </div>
 
         {/* Descripción */}
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
             Descripción
           </label>
           <textarea
             name="description"
-            value={form.description}
+            value={formData.description}
             onChange={handleChange}
-            rows={3}
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
-        </div>
-
-        {/* Información Nutricional */}
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Información Nutricional
-          </label>
-          <textarea
-            name="nutrition"
-            value={form.nutrition}
-            onChange={handleChange}
-            rows={3}
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            rows="4"
+            placeholder="Descripción del producto (la información nutricional se agregará automáticamente si selecciona un producto base)"
           />
         </div>
 
@@ -248,7 +235,7 @@ export default function CreateProductAdmin() {
             <input
               type="number"
               name="quantity"
-              value={form.quantity}
+              value={formData.quantity}
               onChange={handleChange}
               required
               min="0"
@@ -261,7 +248,7 @@ export default function CreateProductAdmin() {
             </label>
             <select
               name="unit"
-              value={form.unit}
+              value={formData.unit}
               onChange={handleChange}
               className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
@@ -283,7 +270,7 @@ export default function CreateProductAdmin() {
             <input
               type="number"
               name="price"
-              value={form.price}
+              value={formData.price}
               onChange={handleChange}
               min="0"
               step="0.01"
@@ -296,7 +283,7 @@ export default function CreateProductAdmin() {
             </label>
             <select
               name="priceType"
-              value={form.priceType}
+              value={formData.priceType}
               onChange={handleChange}
               className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
@@ -316,7 +303,7 @@ export default function CreateProductAdmin() {
           </label>
           <select
             name="category"
-            value={form.category}
+            value={formData.category}
             onChange={handleChange}
             className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
           >
@@ -334,7 +321,7 @@ export default function CreateProductAdmin() {
             <input
               type="checkbox"
               name="isAvailable"
-              checked={form.isAvailable}
+              checked={formData.isAvailable}
               onChange={handleChange}
               className="mr-2 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
             />
@@ -344,7 +331,7 @@ export default function CreateProductAdmin() {
             <input
               type="checkbox"
               name="sasProgram"
-              checked={form.sasProgram}
+              checked={formData.sasProgram}
               onChange={handleChange}
               className="mr-2 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
             />
