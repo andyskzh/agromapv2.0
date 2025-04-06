@@ -10,7 +10,6 @@ export default function EditProductAdmin() {
   const [form, setForm] = useState({
     name: "",
     description: "",
-    nutrition: "",
     quantity: "",
     unit: "kg",
     price: "",
@@ -55,7 +54,6 @@ export default function EditProductAdmin() {
         setForm({
           name: data.product.name,
           description: data.product.description || "",
-          nutrition: data.product.nutrition || "",
           quantity: data.product.quantity,
           unit: data.product.unit || "kg",
           price: data.product.price || "",
@@ -145,8 +143,8 @@ export default function EditProductAdmin() {
           ...form,
           baseProductId,
           name: selectedBaseProduct.name,
+          description: `Información nutricional: ${selectedBaseProduct.nutrition}\n\n${form.description}`,
           category: selectedBaseProduct.category,
-          nutrition: selectedBaseProduct.nutrition,
           image: selectedBaseProduct.image,
         });
         setPreviewImage(selectedBaseProduct.image);
@@ -232,8 +230,8 @@ export default function EditProductAdmin() {
             ))}
           </select>
           <p className="text-sm text-gray-500 mt-1">
-            Al seleccionar un producto base, se completarán automáticamente
-            algunos campos.
+            Al seleccionar un producto base, se copiará su información
+            nutricional en la descripción.
           </p>
         </div>
 
@@ -281,20 +279,6 @@ export default function EditProductAdmin() {
           <textarea
             name="description"
             value={form.description}
-            onChange={handleChange}
-            rows={3}
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
-        </div>
-
-        {/* Información Nutricional */}
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Información Nutricional
-          </label>
-          <textarea
-            name="nutrition"
-            value={form.nutrition}
             onChange={handleChange}
             rows={3}
             className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
