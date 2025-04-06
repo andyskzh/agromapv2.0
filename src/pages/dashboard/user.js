@@ -10,10 +10,12 @@ import {
   FaTrash,
   FaSave,
   FaTimes,
+  FaUpload,
+  FaImage,
 } from "react-icons/fa";
 
 export default function UserDashboard() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
   const [userStats, setUserStats] = useState({
     totalComments: 0,
@@ -36,6 +38,8 @@ export default function UserDashboard() {
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -65,6 +69,7 @@ export default function UserDashboard() {
           password: "",
           image: data.user.image || "",
         });
+        setImagePreview(data.user.image || "");
       })
       .catch((error) => {
         console.error("Error al cargar perfil:", error);
@@ -96,7 +101,68 @@ export default function UserDashboard() {
       password: "",
       image: userProfile.image || "",
     });
+    setImagePreview(userProfile.image || "");
     setError("");
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Verificar el tipo de archivo
+    if (!file.type.startsWith("image/")) {
+      setError("Por favor, selecciona un archivo de imagen válido");
+      return;
+    }
+
+    // Verificar el tamaño del archivo (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError("La imagen no debe superar los 5MB");
+      return;
+    }
+
+    // Crear una vista previa de la imagen
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+
+    // Subir la imagen al servidor
+    uploadImage(file);
+  };
+
+  const uploadImage = async (file) => {
+    setUploadingImage(true);
+    setError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Error al subir la imagen");
+      }
+
+      // Actualizar el formulario con la URL de la imagen
+      setProfileForm({
+        ...profileForm,
+        image: data.url,
+      });
+    } catch (err) {
+      console.error(err);
+      setError("Error al subir la imagen: " + err.message);
+      setImagePreview(userProfile.image || "");
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleProfileSubmit = async (e) => {
@@ -120,6 +186,18 @@ export default function UserDashboard() {
 
       setUserProfile(data.user);
       setEditingProfile(false);
+
+      // Actualizar la sesión para reflejar los cambios en la navbar
+      await update({
+        ...session,
+        user: {
+          ...session.user,
+          name: data.user.name,
+          username: data.user.username,
+          image: data.user.image,
+        },
+      });
+
       setSuccess("Perfil actualizado correctamente");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
@@ -278,14 +356,58 @@ export default function UserDashboard() {
 
               <div>
                 <label className="block font-medium text-gray-700 mb-1">
-                  URL de imagen de perfil
+                  Imagen de perfil
+                </label>
+                <div className="flex items-center space-x-4">
+                  <div className="flex-shrink-0">
+                    {imagePreview ? (
+                      <img
+                        src={imagePreview}
+                        alt="Vista previa"
+                        className="w-20 h-20 rounded-full object-cover border-2 border-gray-300"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
+                        <FaImage className="w-8 h-8 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <label className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors flex items-center cursor-pointer">
+                        <FaUpload className="mr-2" />
+                        Subir imagen
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="hidden"
+                        />
+                      </label>
+                      {uploadingImage && (
+                        <span className="text-sm text-gray-500">
+                          Subiendo imagen...
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Formatos: JPG, PNG, GIF. Máximo 5MB.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-medium text-gray-700 mb-1">
+                  URL de imagen de perfil (alternativa)
                 </label>
                 <input
                   type="text"
                   value={profileForm.image}
-                  onChange={(e) =>
-                    setProfileForm({ ...profileForm, image: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setProfileForm({ ...profileForm, image: e.target.value });
+                    setImagePreview(e.target.value);
+                  }}
                   placeholder="https://ejemplo.com/imagen.jpg"
                   className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
