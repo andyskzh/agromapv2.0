@@ -96,7 +96,7 @@ export default function ProductoDetalle() {
     }
 
     try {
-      await fetch(`/api/comments/${commentId}/vote`, {
+      const res = await fetch(`/api/comments/${commentId}/vote`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -104,13 +104,18 @@ export default function ProductoDetalle() {
         body: JSON.stringify({ type: voteType }),
       });
 
-      // Recargar los comentarios
-      const updatedProduct = await fetch(`/api/public/products/${id}`).then(
-        (res) => res.json()
-      );
-      setProduct(updatedProduct);
+      if (res.ok) {
+        // Recargar los comentarios
+        const updatedProduct = await fetch(`/api/public/products/${id}`).then(
+          (res) => res.json()
+        );
+        setProduct(updatedProduct);
+      } else {
+        const data = await res.json();
+        throw new Error(data.error || "Error al votar el comentario");
+      }
     } catch (error) {
-      alert("Error al votar el comentario");
+      alert(error.message);
     }
   };
 
