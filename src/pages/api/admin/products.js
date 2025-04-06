@@ -22,6 +22,15 @@ export default async function handler(req, res) {
               name: true,
             },
           },
+          baseProduct: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+              category: true,
+              nutrition: true,
+            },
+          },
         },
       });
 
@@ -47,6 +56,8 @@ export default async function handler(req, res) {
             data[key] = value === "true" || value === true;
           } else if (key === "quantity") {
             data[key] = parseInt(value);
+          } else if (key === "price") {
+            data[key] = value ? parseFloat(value) : null;
           } else {
             data[key] = value;
           }
@@ -60,10 +71,15 @@ export default async function handler(req, res) {
         name,
         description,
         quantity,
+        unit,
+        price,
+        priceType,
         category,
         isAvailable,
         sasProgram,
         marketId,
+        baseProductId,
+        image,
       } = data;
 
       // Validar campos requeridos
@@ -88,21 +104,51 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: "Mercado no encontrado" });
       }
 
+      // Verificar si el producto base existe si se proporciona
+      if (baseProductId) {
+        const baseProduct = await prisma.productBase.findUnique({
+          where: { id: baseProductId },
+        });
+
+        if (!baseProduct) {
+          return res
+            .status(400)
+            .json({ message: "Producto base no encontrado" });
+        }
+      }
+
+      // Crear objeto de datos para el producto
+      const productData = {
+        name,
+        description: description || "",
+        quantity: parseInt(quantity),
+        unit: unit || "kg",
+        price: price ? parseFloat(price) : null,
+        priceType: priceType || "unidad",
+        category: category || "OTRO",
+        isAvailable: isAvailable === "true" || isAvailable === true,
+        sasProgram: sasProgram === "true" || sasProgram === true,
+        marketId,
+        baseProductId: baseProductId || null,
+        image: image || null,
+      };
+
       const product = await prisma.product.create({
-        data: {
-          name,
-          description: description || "",
-          quantity: parseInt(quantity),
-          category: category || "OTRO",
-          isAvailable: isAvailable === "true" || isAvailable === true,
-          sasProgram: sasProgram === "true" || sasProgram === true,
-          marketId,
-        },
+        data: productData,
         include: {
           market: {
             select: {
               id: true,
               name: true,
+            },
+          },
+          baseProduct: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+              category: true,
+              nutrition: true,
             },
           },
         },

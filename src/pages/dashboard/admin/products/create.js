@@ -7,21 +7,32 @@ export default function CreateProductAdmin() {
   const [form, setForm] = useState({
     name: "",
     description: "",
+    nutrition: "",
     quantity: "",
+    unit: "kg",
+    price: "",
+    priceType: "unidad",
     category: "OTRO",
     isAvailable: true,
     sasProgram: false,
     marketId: "",
+    baseProductId: "",
+    image: "",
   });
 
   const [markets, setMarkets] = useState([]);
+  const [baseProducts, setBaseProducts] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
 
+  const UNITS = ["kg", "lb", "unidad"];
+  const PRICE_TYPES = ["unidad", "lb"];
   const CATEGORIES = ["FRUTA", "HORTALIZA", "VIANDA", "CARNE_EMBUTIDO", "OTRO"];
 
   useEffect(() => {
     fetchMarkets();
+    fetchBaseProducts();
   }, []);
 
   const fetchMarkets = async () => {
@@ -39,13 +50,63 @@ export default function CreateProductAdmin() {
     }
   };
 
+  const fetchBaseProducts = async () => {
+    try {
+      const res = await fetch("/api/admin/products/base");
+      const data = await res.json();
+      if (res.ok) {
+        setBaseProducts(data.baseProducts || []);
+      } else {
+        setError(data.message || "Error al cargar productos base");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Error al cargar productos base");
+    }
+  };
+
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked, files } = e.target;
 
     if (type === "checkbox") {
       setForm({ ...form, [name]: checked });
+    } else if (type === "file") {
+      // Manejar la subida de imágenes
+      if (files && files.length > 0) {
+        const file = files[0];
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+          setPreviewImage(reader.result);
+          setForm({ ...form, image: reader.result });
+        };
+
+        reader.readAsDataURL(file);
+      }
     } else {
       setForm({ ...form, [name]: value });
+    }
+  };
+
+  const handleBaseProductChange = (e) => {
+    const baseProductId = e.target.value;
+    setForm({ ...form, baseProductId });
+
+    if (baseProductId) {
+      const selectedBaseProduct = baseProducts.find(
+        (bp) => bp.id === baseProductId
+      );
+      if (selectedBaseProduct) {
+        setForm({
+          ...form,
+          baseProductId,
+          name: selectedBaseProduct.name,
+          category: selectedBaseProduct.category,
+          nutrition: selectedBaseProduct.nutrition,
+          image: selectedBaseProduct.image,
+        });
+        setPreviewImage(selectedBaseProduct.image);
+      }
     }
   };
 
@@ -90,6 +151,30 @@ export default function CreateProductAdmin() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Producto Base */}
+        <div>
+          <label className="block font-semibold text-green-900 mb-1">
+            Producto Base (opcional)
+          </label>
+          <select
+            name="baseProductId"
+            value={form.baseProductId}
+            onChange={handleBaseProductChange}
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          >
+            <option value="">Selecciona un producto base</option>
+            {baseProducts.map((bp) => (
+              <option key={bp.id} value={bp.id}>
+                {bp.name}
+              </option>
+            ))}
+          </select>
+          <p className="text-sm text-gray-500 mt-1">
+            Al seleccionar un producto base, se completarán automáticamente
+            algunos campos.
+          </p>
+        </div>
+
         {/* Mercado */}
         <div>
           <label className="block font-semibold text-green-900 mb-1">
@@ -140,20 +225,88 @@ export default function CreateProductAdmin() {
           />
         </div>
 
-        {/* Cantidad */}
+        {/* Información Nutricional */}
         <div>
           <label className="block font-semibold text-green-900 mb-1">
-            Cantidad *
+            Información Nutricional
           </label>
-          <input
-            type="number"
-            name="quantity"
-            value={form.quantity}
+          <textarea
+            name="nutrition"
+            value={form.nutrition}
             onChange={handleChange}
-            required
-            min="0"
+            rows={3}
             className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
           />
+        </div>
+
+        {/* Cantidad y Unidad */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block font-semibold text-green-900 mb-1">
+              Cantidad *
+            </label>
+            <input
+              type="number"
+              name="quantity"
+              value={form.quantity}
+              onChange={handleChange}
+              required
+              min="0"
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block font-semibold text-green-900 mb-1">
+              Unidad
+            </label>
+            <select
+              name="unit"
+              value={form.unit}
+              onChange={handleChange}
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            >
+              {UNITS.map((u) => (
+                <option key={u} value={u}>
+                  {u}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Precio y Tipo */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block font-semibold text-green-900 mb-1">
+              Precio
+            </label>
+            <input
+              type="number"
+              name="price"
+              value={form.price}
+              onChange={handleChange}
+              min="0"
+              step="0.01"
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block font-semibold text-green-900 mb-1">
+              Precio por
+            </label>
+            <select
+              name="priceType"
+              value={form.priceType}
+              onChange={handleChange}
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            >
+              {PRICE_TYPES.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Categoría */}
@@ -196,6 +349,36 @@ export default function CreateProductAdmin() {
               className="mr-2 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
             />
             <label className="font-semibold text-green-900">Programa SAS</label>
+          </div>
+        </div>
+
+        {/* Imagen */}
+        <div>
+          <label className="block font-semibold text-green-900 mb-1">
+            Imagen
+          </label>
+          <div className="flex items-center space-x-4">
+            {previewImage && (
+              <div className="w-24 h-24 border rounded overflow-hidden">
+                <img
+                  src={previewImage}
+                  alt="Vista previa"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            <div className="flex-1">
+              <input
+                type="file"
+                name="image"
+                onChange={handleChange}
+                accept="image/*"
+                className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Sube una imagen para el producto o selecciona un producto base.
+              </p>
+            </div>
           </div>
         </div>
 
