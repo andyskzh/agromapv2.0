@@ -338,10 +338,162 @@ export default function Statistics() {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Estadísticas</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Dashboard Administrativo
+          </h1>
           <p className="mt-2 text-sm text-gray-600">
-            Visualización detallada de datos y métricas importantes del sistema
+            Bienvenido, {session.user.name}. Aquí puedes ver las estadísticas y
+            métricas importantes del sistema.
           </p>
+        </div>
+
+        {/* Tarjetas de resumen */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+          <Link
+            href="/dashboard/admin/users"
+            className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-800">Usuarios</h3>
+              <svg
+                className="w-8 h-8 text-green-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                />
+              </svg>
+            </div>
+            <div className="mt-4">
+              <div className="text-3xl font-bold text-gray-900">
+                {stats.users.total}
+              </div>
+              <p className="mt-2 text-sm text-gray-600">Usuarios registrados</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/dashboard/admin/products"
+            className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-800">Productos</h3>
+              <svg
+                className="w-8 h-8 text-green-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
+            </div>
+            <div className="mt-4">
+              <div className="text-3xl font-bold text-gray-900">
+                {stats.products.total}
+              </div>
+              <p className="mt-2 text-sm text-gray-600">
+                Productos en el sistema
+              </p>
+            </div>
+          </Link>
+
+          <Link
+            href="/dashboard/admin/markets"
+            className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-800">Mercados</h3>
+              <svg
+                className="w-8 h-8 text-green-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div className="mt-4">
+              <div className="text-3xl font-bold text-gray-900">
+                {stats.markets.total}
+              </div>
+              <p className="mt-2 text-sm text-gray-600">Mercados activos</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/dashboard/admin/products/base"
+            className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-800">
+                Productos Base
+              </h3>
+              <svg
+                className="w-8 h-8 text-green-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                />
+              </svg>
+            </div>
+            <div className="mt-4">
+              <div className="text-3xl font-bold text-gray-900">
+                {stats.baseProducts.total}
+              </div>
+              <p className="mt-2 text-sm text-gray-600">Productos base</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/dashboard/admin/comments"
+            className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-800">
+                Comentarios
+              </h3>
+              <svg
+                className="w-8 h-8 text-green-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                />
+              </svg>
+            </div>
+            <div className="mt-4">
+              <div className="text-3xl font-bold text-gray-900">
+                {stats.comments.total}
+              </div>
+              <p className="mt-2 text-sm text-gray-600">Comentarios totales</p>
+            </div>
+          </Link>
         </div>
 
         {/* Pestañas de navegación */}
@@ -403,278 +555,39 @@ export default function Statistics() {
         {/* Contenido de las pestañas */}
         {activeTab === "general" && (
           <div className="space-y-8">
-            {/* Tarjetas de resumen */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-green-100 text-green-600">
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                      />
-                    </svg>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">
-                      Usuarios
-                    </p>
-                    <p className="text-2xl font-semibold text-gray-900">
-                      {stats.users.total}
-                    </p>
-                  </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Crecimiento de usuarios
+                </h3>
+                <div className="h-64">
+                  <Line data={userGrowthData} options={lineChartOptions} />
                 </div>
               </div>
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-blue-100 text-blue-600">
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                      />
-                    </svg>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">
-                      Productos
-                    </p>
-                    <p className="text-2xl font-semibold text-gray-900">
-                      {stats.products.total}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">
-                      Mercados
-                    </p>
-                    <p className="text-2xl font-semibold text-gray-900">
-                      {stats.markets.total}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-purple-100 text-purple-600">
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-                      />
-                    </svg>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">
-                      Comentarios
-                    </p>
-                    <p className="text-2xl font-semibold text-gray-900">
-                      {stats.comments.total}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Gráficos de resumen */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Usuarios por rol
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Distribución de usuarios por rol
                 </h3>
                 <div className="h-64">
                   <Doughnut data={userRoleData} options={chartOptions} />
                 </div>
               </div>
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Productos por categoría
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Crecimiento de productos
                 </h3>
                 <div className="h-64">
-                  <Doughnut data={productCategoryData} options={chartOptions} />
+                  <Line data={productGrowthData} options={lineChartOptions} />
                 </div>
               </div>
-            </div>
-
-            {/* Crecimiento en los últimos 6 meses */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Crecimiento en los últimos 6 meses
-              </h3>
-              <div className="h-80">
-                <Line
-                  data={{
-                    labels: stats.users.byMonth
-                      .map((item) => {
-                        const [year, month] = item.month.split("-");
-                        const date = new Date(year, month - 1);
-                        return date.toLocaleDateString("es-ES", {
-                          month: "short",
-                          year: "numeric",
-                        });
-                      })
-                      .reverse(),
-                    datasets: [
-                      {
-                        label: "Usuarios",
-                        data: stats.users.byMonth
-                          .map((item) => item.count)
-                          .reverse(),
-                        borderColor: "#10B981",
-                        backgroundColor: "rgba(16, 185, 129, 0.1)",
-                        tension: 0.3,
-                        fill: true,
-                      },
-                      {
-                        label: "Productos",
-                        data: stats.products.byMonth
-                          .map((item) => item.count)
-                          .reverse(),
-                        borderColor: "#3B82F6",
-                        backgroundColor: "rgba(59, 130, 246, 0.1)",
-                        tension: 0.3,
-                        fill: true,
-                      },
-                      {
-                        label: "Mercados",
-                        data: stats.markets.byMonth
-                          .map((item) => item.count)
-                          .reverse(),
-                        borderColor: "#F59E0B",
-                        backgroundColor: "rgba(245, 158, 11, 0.1)",
-                        tension: 0.3,
-                        fill: true,
-                      },
-                      {
-                        label: "Comentarios",
-                        data: stats.comments.byMonth
-                          .map((item) => item.count)
-                          .reverse(),
-                        borderColor: "#8B5CF6",
-                        backgroundColor: "rgba(139, 92, 246, 0.1)",
-                        tension: 0.3,
-                        fill: true,
-                      },
-                    ],
-                  }}
-                  options={{
-                    ...lineChartOptions,
-                    plugins: {
-                      ...lineChartOptions.plugins,
-                      legend: {
-                        position: "top",
-                      },
-                    },
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Productos más comentados y mejor calificados */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Productos más comentados
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Estado de productos
                 </h3>
-                <div className="overflow-hidden">
-                  <ul className="divide-y divide-gray-200">
-                    {stats.products.mostCommented.map((product, index) => (
-                      <li
-                        key={product.id}
-                        className="py-3 flex items-center justify-between"
-                      >
-                        <div className="flex items-center">
-                          <span className="flex-shrink-0 h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-green-800 font-medium">
-                            {index + 1}
-                          </span>
-                          <span className="ml-3 text-sm font-medium text-gray-900">
-                            {product.name}
-                          </span>
-                        </div>
-                        <span className="text-sm text-gray-500">
-                          {product.commentCount} comentarios
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Productos mejor calificados
-                </h3>
-                <div className="overflow-hidden">
-                  <ul className="divide-y divide-gray-200">
-                    {stats.products.topRated.map((product, index) => (
-                      <li
-                        key={product.id}
-                        className="py-3 flex items-center justify-between"
-                      >
-                        <div className="flex items-center">
-                          <span className="flex-shrink-0 h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-green-800 font-medium">
-                            {index + 1}
-                          </span>
-                          <span className="ml-3 text-sm font-medium text-gray-900">
-                            {product.name}
-                          </span>
-                        </div>
-                        <div className="flex items-center">
-                          <span className="text-sm text-yellow-500 mr-1">
-                            {product.averageRating.toFixed(1)}
-                          </span>
-                          <svg
-                            className="h-4 w-4 text-yellow-500"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                          <span className="text-xs text-gray-500 ml-1">
-                            ({product.commentCount})
-                          </span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="h-64">
+                  <Pie data={productStatusData} options={chartOptions} />
                 </div>
               </div>
             </div>

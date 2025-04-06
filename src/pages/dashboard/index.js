@@ -16,7 +16,7 @@ export default function DashboardRouter() {
 
     const role = session.user.role;
 
-    if (role === "ADMIN") router.push("/dashboard/admin");
+    if (role === "ADMIN") router.push("/dashboard/admin/statistics");
     else if (role === "MARKET_MANAGER") router.push("/dashboard/manager");
     else router.push("/dashboard/user");
   }, [session, status, router]);
