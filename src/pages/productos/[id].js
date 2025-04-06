@@ -152,86 +152,6 @@ export default function ProductoDetalle() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
 
-          <button
-            onClick={() => setShowInfoModal(true)}
-            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-          >
-            Ver Información del Producto
-          </button>
-
-          {/* Modal de Información */}
-          <Transition appear show={showInfoModal} as={Fragment}>
-            <Dialog
-              as="div"
-              className="relative z-10"
-              onClose={() => setShowInfoModal(false)}
-            >
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0"
-                enterTo="opacity-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100"
-                leaveTo="opacity-0"
-              >
-                <div className="fixed inset-0 bg-black bg-opacity-25" />
-              </Transition.Child>
-
-              <div className="fixed inset-0 overflow-y-auto">
-                <div className="flex min-h-full items-center justify-center p-4 text-center">
-                  <Transition.Child
-                    as={Fragment}
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0 scale-95"
-                    enterTo="opacity-100 scale-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100 scale-100"
-                    leaveTo="opacity-0 scale-95"
-                  >
-                    <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                      <Dialog.Title
-                        as="h3"
-                        className="text-lg font-medium leading-6 text-gray-900"
-                      >
-                        Información del Producto
-                      </Dialog.Title>
-                      {product.description && (
-                        <div className="mt-4">
-                          <h4 className="font-medium text-gray-900">
-                            Descripción
-                          </h4>
-                          <p className="mt-2 text-gray-600">
-                            {product.description}
-                          </p>
-                        </div>
-                      )}
-                      {product.nutrition && (
-                        <div className="mt-4">
-                          <h4 className="font-medium text-gray-900">
-                            Información Nutricional
-                          </h4>
-                          <pre className="mt-2 whitespace-pre-wrap text-sm text-gray-600">
-                            {product.nutrition}
-                          </pre>
-                        </div>
-                      )}
-                      <div className="mt-4">
-                        <button
-                          type="button"
-                          className="inline-flex justify-center rounded-md border border-transparent bg-green-100 px-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
-                          onClick={() => setShowInfoModal(false)}
-                        >
-                          Cerrar
-                        </button>
-                      </div>
-                    </Dialog.Panel>
-                  </Transition.Child>
-                </div>
-              </div>
-            </Dialog>
-          </Transition>
-
           {/* Disponibilidad en Mercados */}
           <div className="mt-8">
             <h2 className="text-lg font-semibold text-gray-900">
@@ -268,46 +188,190 @@ export default function ProductoDetalle() {
             </div>
           </div>
 
+          {/* Botón de Información Nutricional */}
+          <div className="mt-6">
+            <button
+              onClick={() => setShowInfoModal(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              Ver Información Nutricional
+            </button>
+          </div>
+
+          {/* Modal de Información */}
+          <Transition appear show={showInfoModal} as={Fragment}>
+            <Dialog
+              as="div"
+              className="relative z-10"
+              onClose={() => setShowInfoModal(false)}
+            >
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0"
+                enterTo="opacity-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
+              >
+                <div className="fixed inset-0 bg-transparent" />
+              </Transition.Child>
+
+              <div className="fixed inset-0 overflow-y-auto">
+                <div className="flex min-h-full items-center justify-center p-4 text-center">
+                  <Transition.Child
+                    as={Fragment}
+                    enter="ease-out duration-300"
+                    enterFrom="opacity-0 scale-95"
+                    enterTo="opacity-100 scale-100"
+                    leave="ease-in duration-200"
+                    leaveFrom="opacity-100 scale-100"
+                    leaveTo="opacity-0 scale-95"
+                  >
+                    <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                      <Dialog.Title
+                        as="h3"
+                        className="text-lg font-medium leading-6 text-gray-900"
+                      >
+                        Información Nutricional
+                      </Dialog.Title>
+                      {product.nutrition ? (
+                        <div className="mt-4">
+                          <pre className="mt-2 whitespace-pre-wrap text-sm text-gray-600">
+                            {product.nutrition}
+                          </pre>
+                        </div>
+                      ) : product.description ? (
+                        <div className="mt-4">
+                          <pre className="mt-2 whitespace-pre-wrap text-sm text-gray-600">
+                            {product.description}
+                          </pre>
+                        </div>
+                      ) : (
+                        <div className="mt-4">
+                          <p className="text-sm text-gray-500">
+                            No hay información nutricional disponible para este
+                            producto.
+                          </p>
+                        </div>
+                      )}
+                      <div className="mt-4">
+                        <button
+                          type="button"
+                          className="inline-flex justify-center rounded-md border border-transparent bg-green-100 px-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+                          onClick={() => setShowInfoModal(false)}
+                        >
+                          Cerrar
+                        </button>
+                      </div>
+                    </Dialog.Panel>
+                  </Transition.Child>
+                </div>
+              </div>
+            </Dialog>
+          </Transition>
+
           {/* Valoraciones */}
           <div className="mt-8">
             <h2 className="text-lg font-semibold text-gray-900">
               Valoración de los clientes
             </h2>
-            <div className="mt-3">
-              <div className="flex items-center">
-                {[0, 1, 2, 3, 4].map((rating) => (
-                  <StarIcon
-                    key={rating}
-                    className={`${
-                      product.valoraciones.promedio > rating
-                        ? "text-yellow-400"
-                        : "text-gray-300"
-                    } h-5 w-5 flex-shrink-0`}
-                  />
-                ))}
-                <p className="ml-2 text-sm text-gray-700">
-                  {product.valoraciones.promedio} de 5 (
-                  {product.valoraciones.total} valoraciones)
-                </p>
-              </div>
 
-              <div className="mt-6">
-                {product.valoraciones.distribucion.map((dist) => (
-                  <div key={dist.estrellas} className="flex items-center mt-1">
-                    <span className="text-sm text-gray-600 w-12">
-                      {dist.estrellas} stars
-                    </span>
-                    <div className="flex-1 h-4 mx-4 bg-gray-100 rounded">
+            {/* Valoraciones por mercado */}
+            <div className="mt-4">
+              <h3 className="text-md font-medium text-gray-900 mb-4">
+                Valoraciones por mercado
+              </h3>
+
+              <div className="overflow-x-auto">
+                <div className="flex space-x-4 pb-4">
+                  {product.markets?.map((market) => {
+                    // Calcular valoraciones para este mercado
+                    const marketComments = product.comments.filter(
+                      (comment) => comment.marketId === market.id
+                    );
+
+                    const totalRatings = marketComments.length;
+                    const avgRating =
+                      totalRatings > 0
+                        ? marketComments.reduce(
+                            (sum, comment) => sum + comment.rating,
+                            0
+                          ) / totalRatings
+                        : 0;
+
+                    // Calcular distribución de estrellas
+                    const ratingDistribution = [0, 0, 0, 0, 0];
+                    marketComments.forEach((comment) => {
+                      if (comment.rating >= 1 && comment.rating <= 5) {
+                        ratingDistribution[comment.rating - 1]++;
+                      }
+                    });
+
+                    return (
                       <div
-                        className="h-4 bg-yellow-400 rounded"
-                        style={{ width: `${dist.porcentaje}%` }}
-                      />
-                    </div>
-                    <span className="text-sm text-gray-600 w-12">
-                      {dist.porcentaje}%
-                    </span>
-                  </div>
-                ))}
+                        key={market.id}
+                        className="flex-shrink-0 w-64 bg-white rounded-lg shadow p-4"
+                      >
+                        <div className="flex items-center mb-2">
+                          <MapPinIcon className="h-4 w-4 text-red-500 mr-1" />
+                          <h4 className="font-medium text-gray-900 truncate">
+                            {market.name}
+                          </h4>
+                        </div>
+
+                        <div className="flex items-center">
+                          {[0, 1, 2, 3, 4].map((rating) => (
+                            <StarIcon
+                              key={rating}
+                              className={`${
+                                avgRating > rating
+                                  ? "text-yellow-400"
+                                  : "text-gray-300"
+                              } h-4 w-4 flex-shrink-0`}
+                            />
+                          ))}
+                          <p className="ml-2 text-sm text-gray-700">
+                            {avgRating.toFixed(1)} de 5
+                          </p>
+                        </div>
+
+                        <p className="text-xs text-gray-500 mt-1">
+                          {totalRatings} valoraciones
+                        </p>
+
+                        <div className="mt-2">
+                          {ratingDistribution.map((count, index) => {
+                            const percentage =
+                              totalRatings > 0
+                                ? (count / totalRatings) * 100
+                                : 0;
+
+                            return (
+                              <div
+                                key={index}
+                                className="flex items-center mt-1"
+                              >
+                                <span className="text-xs text-gray-600 w-8">
+                                  {index + 1}
+                                </span>
+                                <div className="flex-1 h-2 mx-2 bg-gray-100 rounded">
+                                  <div
+                                    className="h-2 bg-yellow-400 rounded"
+                                    style={{ width: `${percentage}%` }}
+                                  />
+                                </div>
+                                <span className="text-xs text-gray-600 w-8">
+                                  {count}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
