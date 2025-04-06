@@ -60,6 +60,23 @@ export default async function handler(req, res) {
           .json({ message: "No se encontró el mercado del gestor" });
       }
 
+      // Buscar si existe un ProductBase con el mismo nombre
+      let baseProduct = await prisma.productBase.findFirst({
+        where: { name: name.toString() },
+      });
+
+      // Si no existe, crear uno nuevo
+      if (!baseProduct) {
+        baseProduct = await prisma.productBase.create({
+          data: {
+            name: name.toString(),
+            image: images[0].filepath,
+            category: "OTRO", // Categoría por defecto
+            nutrition: "", // Valor por defecto
+          },
+        });
+      }
+
       // Subir imágenes a Cloudinary
       const uploadedImages = await Promise.all(
         images.map(async (imageFile) => {
@@ -79,6 +96,7 @@ export default async function handler(req, res) {
           sasProgram: sasProgram === "true",
           image: uploadedImages[0], // imagen principal
           marketId: market.id,
+          baseProductId: baseProduct.id, // Vincular con el ProductBase
         },
       });
 

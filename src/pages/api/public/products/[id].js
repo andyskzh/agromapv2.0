@@ -17,6 +17,21 @@ export default async function handler(req, res) {
       include: {
         market: true,
         baseProduct: true,
+      },
+    });
+
+    if (!product) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
+
+    // Obtener todos los productos relacionados (mismo ProductBase)
+    const relatedProducts = await prisma.product.findMany({
+      where: {
+        baseProductId: product.baseProductId,
+        isAvailable: true,
+      },
+      include: {
+        market: true,
         comments: {
           include: {
             user: true,
@@ -25,40 +40,11 @@ export default async function handler(req, res) {
       },
     });
 
-    if (!product) {
-      return res.status(404).json({ error: "Producto no encontrado" });
-    }
+    // Combinar todos los comentarios de los productos relacionados
+    const allComments = relatedProducts.flatMap((p) => p.comments);
 
-    // Luego buscamos todos los productos con el mismo baseProductId
-    const relatedProducts = await prisma.product.findMany({
-      where: {
-        baseProductId: product.baseProductId,
-        isAvailable: true,
-        NOT: {
-          id: product.id, // Excluimos el producto actual
-        },
-      },
-      include: {
-        market: true,
-      },
-    });
-
-    // Combinamos el producto actual con los relacionados para la lista de mercados
-    const allProducts = [product, ...relatedProducts];
-
-    // Formatear la información de los mercados
-    const markets = allProducts.map((p) => ({
-      id: p.marketId,
-      name: p.market.name,
-      location: p.market.location,
-      price: p.price,
-      priceType: p.priceType,
-      quantity: p.quantity,
-      unit: p.unit,
-    }));
-
-    // Calcular el promedio de valoraciones
-    const ratings = product.comments.map((comment) => comment.rating);
+    // Calcular el promedio de valoraciones usando todos los comentarios
+    const ratings = allComments.map((comment) => comment.rating);
     const averageRating =
       ratings.length > 0
         ? ratings.reduce((a, b) => a + b, 0) / ratings.length
@@ -72,9 +58,20 @@ export default async function handler(req, res) {
       return { estrellas: stars, porcentaje: Math.round(percentage) };
     });
 
+    // Formatear la información de los mercados
+    const markets = relatedProducts.map((p) => ({
+      id: p.marketId,
+      name: p.market.name,
+      location: p.market.location,
+      price: p.price,
+      priceType: p.priceType,
+      quantity: p.quantity,
+      unit: p.unit,
+    }));
+
     // Obtener los mercados para cada comentario
     const commentsWithMarkets = await Promise.all(
-      product.comments.map(async (comment) => {
+      allComments.map(async (comment) => {
         const commentMarket = await prisma.market.findUnique({
           where: { id: comment.marketId },
         });

@@ -32,6 +32,9 @@ export default async function handler(req, res) {
       // Verificar que el producto existe
       const product = await prisma.product.findUnique({
         where: { id: productId },
+        include: {
+          baseProduct: true,
+        },
       });
 
       if (!product) {
@@ -50,31 +53,16 @@ export default async function handler(req, res) {
       // Crear el comentario
       const comment = await prisma.comment.create({
         data: {
+          content: content || "",
+          rating,
+          recommends: recommends ?? true,
+          marketId,
           userId: session.user.id,
           productId,
-          marketId,
-          rating,
-          content: content || "", // Permitir comentarios vacíos
-          recommends: recommends ?? true, // Valor por defecto true si no se especifica
-          likes: 0,
-          dislikes: 0,
         },
         include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              username: true,
-              image: true,
-            },
-          },
-          market: {
-            select: {
-              id: true,
-              name: true,
-              location: true,
-            },
-          },
+          user: true,
+          market: true,
         },
       });
 
