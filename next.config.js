@@ -12,6 +12,7 @@ const nextConfig = {
         hostname: "i.pinimg.com",
       },
     ],
+    domains: ["res.cloudinary.com"],
   },
 };
 
