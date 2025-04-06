@@ -47,13 +47,18 @@ export default function AdminComments() {
     try {
       const res = await fetch(`/api/admin/comments/${id}`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
+
+      const data = await res.json();
 
       if (res.ok) {
         setComments((prev) => prev.filter((c) => c.id !== id));
+        setError(""); // Limpiar cualquier error previo
       } else {
-        const data = await res.json();
-        setError(data.message || "Error al eliminar el comentario");
+        setError(data.error || "Error al eliminar el comentario");
       }
     } catch (err) {
       console.error(err);
