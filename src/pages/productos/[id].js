@@ -1,14 +1,13 @@
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import Image from "next/image";
 import { StarIcon } from "@heroicons/react/20/solid";
 import {
   MapPinIcon,
-  ThumbUpIcon,
-  ThumbDownIcon,
+  HandThumbUpIcon as ThumbUpIcon,
+  HandThumbDownIcon as ThumbDownIcon,
 } from "@heroicons/react/24/outline";
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
 import { useSession } from "next-auth/react";
 
 export default function ProductoDetalle() {

@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -10,29 +10,42 @@ export const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
-      name: "credentials",
+      name: "Credentials",
       credentials: {
         username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const user = await prisma.user.findUnique({
-          where: { username: credentials.username },
-        });
-
-        if (!user || !user.password) {
-          throw new Error("No user found");
+        if (!credentials?.username || !credentials?.password) {
+          throw new Error("Se requieren credenciales");
         }
 
-        const isValid = await bcrypt.compare(
+        const user = await prisma.user.findUnique({
+          where: {
+            username: credentials.username,
+          },
+        });
+
+        if (!user) {
+          throw new Error("Usuario no encontrado");
+        }
+
+        const isPasswordValid = await bcrypt.compare(
           credentials.password,
           user.password
         );
-        if (!isValid) {
-          throw new Error("Invalid password");
+
+        if (!isPasswordValid) {
+          throw new Error("Contraseña incorrecta");
         }
 
-        return user;
+        return {
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          image: user.image,
+          role: user.role,
+        };
       },
     }),
   ],
@@ -42,22 +55,24 @@ export const authOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
         token.id = user.id;
+        token.role = user.role;
+        token.username = user.username;
       }
       return token;
     },
     async session({ session, token }) {
-      session.user.id = token.id;
-      session.user.role = token.role; // Asegurarnos de que el rol se pasa a la sesión
+      if (token) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+        session.user.username = token.username;
+      }
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/auth/signin",
   },
 };
 
-const handler = NextAuth(authOptions);
 export default NextAuth(authOptions);

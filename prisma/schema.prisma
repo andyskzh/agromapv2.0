@@ -31,6 +31,7 @@ model Market {
   updatedAt   DateTime  @updatedAt
   manager     User      @relation(fields: [managerId], references: [id])
   products    Product[]
+  comments    Comment[]
 }
 
 model Product {
