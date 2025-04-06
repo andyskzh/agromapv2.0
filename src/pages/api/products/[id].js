@@ -30,53 +30,43 @@ export default async function handler(req, res) {
         where: { id },
         include: {
           market: true,
-          comments: {
-            include: {
-              user: true,
-            },
-          },
           baseProduct: true,
         },
       });
 
       if (!product) {
-        return res.status(404).json({ error: "Producto no encontrado" });
+        return res.status(404).json({ message: "Producto no encontrado" });
       }
 
-      // Calcular el promedio de valoraciones
-      const ratings = product.comments.map((comment) => comment.rating);
-      const averageRating =
-        ratings.length > 0
-          ? ratings.reduce((a, b) => a + b, 0) / ratings.length
-          : 0;
+      // Verificar que el producto pertenece al mercado del gestor
+      if (product.marketId !== market.id) {
+        return res
+          .status(403)
+          .json({ message: "No autorizado para ver este producto" });
+      }
 
-      // Calcular la distribución de valoraciones
-      const distribution = [5, 4, 3, 2, 1].map((stars) => {
-        const count = ratings.filter((r) => r === stars).length;
-        const percentage =
-          ratings.length > 0 ? (count / ratings.length) * 100 : 0;
-        return { estrellas: stars, porcentaje: Math.round(percentage) };
-      });
-
-      const formattedProduct = {
-        ...product,
-        valoraciones: {
-          promedio: Number(averageRating.toFixed(1)),
-          total: ratings.length,
-          distribucion: distribution,
-        },
-      };
-
-      return res.status(200).json(formattedProduct);
+      return res.status(200).json({ product });
     }
 
     if (req.method === "PUT") {
-      const { name, description, quantity, image } = req.body;
+      const {
+        name,
+        description,
+        quantity,
+        unit,
+        price,
+        priceType,
+        category,
+        isAvailable,
+        sasProgram,
+        baseProductId,
+        image,
+      } = req.body;
 
-      if (!name || !quantity || quantity < 1) {
+      if (!name || !quantity) {
         return res
           .status(400)
-          .json({ message: "Nombre y cantidad válida son obligatorios" });
+          .json({ message: "Nombre y cantidad son obligatorios" });
       }
 
       const updated = await prisma.product.updateMany({
@@ -84,7 +74,14 @@ export default async function handler(req, res) {
         data: {
           name,
           description,
-          quantity,
+          quantity: parseInt(quantity),
+          unit,
+          price: price ? parseFloat(price) : null,
+          priceType,
+          category,
+          isAvailable,
+          sasProgram,
+          baseProductId: baseProductId || null,
           image,
         },
       });
@@ -117,7 +114,7 @@ export default async function handler(req, res) {
     res.setHeader("Allow", ["GET", "PUT", "DELETE"]);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   } catch (error) {
-    console.error("Error al obtener el producto:", error);
-    return res.status(500).json({ error: "Error al obtener el producto" });
+    console.error("Error al procesar el producto:", error);
+    return res.status(500).json({ message: "Error al procesar el producto" });
   }
 }
