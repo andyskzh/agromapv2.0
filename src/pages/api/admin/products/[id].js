@@ -1,6 +1,6 @@
 import { PrismaClient, ProductCategory } from "@prisma/client";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]";
+import { authOptions } from "../../auth/[...nextauth]";
 
 const prisma = new PrismaClient();
 
@@ -11,10 +11,12 @@ export default async function handler(req, res) {
     return res.status(401).json({ message: "No autorizado" });
   }
 
+  const { id } = req.query;
+
   if (req.method === "GET") {
     try {
-      const products = await prisma.product.findMany({
-        orderBy: { createdAt: "desc" },
+      const product = await prisma.product.findUnique({
+        where: { id },
         include: {
           market: {
             select: {
@@ -25,37 +27,19 @@ export default async function handler(req, res) {
         },
       });
 
-      return res.status(200).json({ products });
+      if (!product) {
+        return res.status(404).json({ message: "Producto no encontrado" });
+      }
+
+      return res.status(200).json({ product });
     } catch (error) {
-      console.error("Error al obtener productos:", error);
-      return res.status(500).json({ message: "Error al obtener productos" });
+      console.error("Error al obtener producto:", error);
+      return res.status(500).json({ message: "Error al obtener producto" });
     }
   }
 
-  if (req.method === "POST") {
+  if (req.method === "PUT") {
     try {
-      // Verificar si es FormData o JSON
-      let data;
-      if (req.headers["content-type"]?.includes("multipart/form-data")) {
-        // Procesar FormData
-        data = {};
-        for (const [key, value] of Object.entries(req.body)) {
-          if (key === "images") {
-            // Manejar imágenes si es necesario
-            continue;
-          } else if (key === "isAvailable" || key === "sasProgram") {
-            data[key] = value === "true" || value === true;
-          } else if (key === "quantity") {
-            data[key] = parseInt(value);
-          } else {
-            data[key] = value;
-          }
-        }
-      } else {
-        // Procesar JSON
-        data = req.body;
-      }
-
       const {
         name,
         description,
@@ -64,7 +48,7 @@ export default async function handler(req, res) {
         isAvailable,
         sasProgram,
         marketId,
-      } = data;
+      } = req.body;
 
       // Validar campos requeridos
       if (!name || !quantity || !marketId) {
@@ -88,7 +72,8 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: "Mercado no encontrado" });
       }
 
-      const product = await prisma.product.create({
+      const updatedProduct = await prisma.product.update({
+        where: { id },
         data: {
           name,
           description: description || "",
@@ -108,10 +93,34 @@ export default async function handler(req, res) {
         },
       });
 
-      return res.status(201).json({ product });
+      return res.status(200).json({ product: updatedProduct });
     } catch (error) {
-      console.error("Error al crear producto:", error);
-      return res.status(500).json({ message: "Error al crear producto" });
+      console.error("Error al actualizar producto:", error);
+      return res.status(500).json({ message: "Error al actualizar producto" });
+    }
+  }
+
+  if (req.method === "DELETE") {
+    try {
+      // Verificar si el producto tiene comentarios
+      const productWithComments = await prisma.product.findUnique({
+        where: { id },
+        include: {
+          comments: true,
+        },
+      });
+
+      if (productWithComments.comments.length > 0) {
+        return res.status(400).json({
+          message: "No se puede eliminar un producto que tiene comentarios",
+        });
+      }
+
+      await prisma.product.delete({ where: { id } });
+      return res.status(200).json({ message: "Producto eliminado" });
+    } catch (error) {
+      console.error("Error al eliminar producto:", error);
+      return res.status(500).json({ message: "Error al eliminar producto" });
     }
   }
 
