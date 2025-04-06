@@ -1,15 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
 import { PrismaClient } from "@prisma/client";
-import { IncomingForm } from "formidable"; // ✅ Import corregido
 import { v2 as cloudinary } from "cloudinary";
-import fs from "fs";
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
 
 const prisma = new PrismaClient();
 
@@ -30,18 +22,20 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Método no permitido" });
   }
 
-  const form = new IncomingForm({ multiples: true });
-
-  form.parse(req, async (err, fields, files) => {
-    if (err) {
-      console.error("Error al parsear FormData:", err);
-      return res
-        .status(500)
-        .json({ message: "Error al procesar datos del formulario" });
-    }
-
-    const { name, description, quantity, isAvailable, sasProgram } = fields;
-    const images = Array.isArray(files.images) ? files.images : [files.images];
+  try {
+    const {
+      name,
+      description,
+      quantity,
+      unit,
+      price,
+      priceType,
+      category,
+      isAvailable,
+      sasProgram,
+      baseProductId,
+      image,
+    } = req.body;
 
     if (!name || !quantity || quantity < 1) {
       return res
@@ -49,63 +43,48 @@ export default async function handler(req, res) {
         .json({ message: "Nombre y cantidad válida son obligatorios" });
     }
 
-    try {
-      const market = await prisma.market.findFirst({
-        where: { managerId: session.user.id },
-      });
+    // Obtener el mercado del gestor
+    const market = await prisma.market.findFirst({
+      where: { managerId: session.user.id },
+    });
 
-      if (!market) {
-        return res
-          .status(404)
-          .json({ message: "No se encontró el mercado del gestor" });
-      }
-
-      // Buscar si existe un ProductBase con el mismo nombre
-      let baseProduct = await prisma.productBase.findFirst({
-        where: { name: name.toString() },
-      });
-
-      // Si no existe, crear uno nuevo
-      if (!baseProduct) {
-        baseProduct = await prisma.productBase.create({
-          data: {
-            name: name.toString(),
-            image: images[0].filepath,
-            category: "OTRO", // Categoría por defecto
-            nutrition: "", // Valor por defecto
-          },
-        });
-      }
-
-      // Subir imágenes a Cloudinary
-      const uploadedImages = await Promise.all(
-        images.map(async (imageFile) => {
-          const result = await cloudinary.uploader.upload(imageFile.filepath, {
-            folder: "agromap/productos",
-          });
-          return result.secure_url;
-        })
-      );
-
-      const product = await prisma.product.create({
-        data: {
-          name: name.toString(),
-          description: description?.toString() || null,
-          quantity: parseInt(quantity),
-          isAvailable: isAvailable === "true",
-          sasProgram: sasProgram === "true",
-          image: uploadedImages[0], // imagen principal
-          marketId: market.id,
-          baseProductId: baseProduct.id, // Vincular con el ProductBase
-        },
-      });
-
-      // 🚨 Aquí podrías guardar más URLs en otra tabla si deseas más adelante
-
-      return res.status(201).json({ message: "Producto creado", product });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Error al crear el producto" });
+    if (!market) {
+      return res
+        .status(404)
+        .json({ message: "No se encontró el mercado del gestor" });
     }
-  });
+
+    let imageUrl = null;
+
+    // Si hay una imagen en base64, subirla a Cloudinary
+    if (image && image.startsWith("data:image")) {
+      const result = await cloudinary.uploader.upload(image, {
+        folder: "agromap/productos",
+      });
+      imageUrl = result.secure_url;
+    }
+
+    // Crear el producto
+    const product = await prisma.product.create({
+      data: {
+        name,
+        description: description || null,
+        quantity: parseInt(quantity),
+        unit: unit || "kg",
+        price: price ? parseFloat(price) : null,
+        priceType: priceType || "unidad",
+        category: category || "OTRO",
+        isAvailable: isAvailable === true,
+        sasProgram: sasProgram === true,
+        image: imageUrl,
+        marketId: market.id,
+        baseProductId: baseProductId || null,
+      },
+    });
+
+    return res.status(201).json({ message: "Producto creado", product });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error al crear el producto" });
+  }
 }
