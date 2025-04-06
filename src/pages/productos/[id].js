@@ -21,6 +21,8 @@ export default function ProductoDetalle() {
   const [showCommentForm, setShowCommentForm] = useState(false);
   const [showRatingForm, setShowRatingForm] = useState(false);
   const [currentMarketIndex, setCurrentMarketIndex] = useState(0);
+  const [commentFilter, setCommentFilter] = useState("recent");
+  const [marketFilter, setMarketFilter] = useState("");
   const [newComment, setNewComment] = useState({
     rating: 5,
     content: "",
@@ -592,9 +594,8 @@ export default function ProductoDetalle() {
             <div className="flex flex-wrap gap-2 mb-4">
               <select
                 className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                onChange={(e) => {
-                  /* TODO: Implementar filtrado */
-                }}
+                value={commentFilter}
+                onChange={(e) => setCommentFilter(e.target.value)}
               >
                 <option value="recent">Más recientes</option>
                 <option value="liked">Más valorados</option>
@@ -602,9 +603,8 @@ export default function ProductoDetalle() {
 
               <select
                 className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                onChange={(e) => {
-                  /* TODO: Implementar filtrado por mercado */
-                }}
+                value={marketFilter}
+                onChange={(e) => setMarketFilter(e.target.value)}
               >
                 <option value="">Todos los mercados</option>
                 {product.markets?.map((market) => (
@@ -619,6 +619,18 @@ export default function ProductoDetalle() {
             <div className="space-y-6">
               {product.comments
                 .filter((comment) => comment.content.trim() !== "") // Solo mostrar comentarios con contenido
+                .filter(
+                  (comment) =>
+                    !marketFilter || comment.marketId === marketFilter
+                ) // Filtrar por mercado
+                .sort((a, b) => {
+                  if (commentFilter === "recent") {
+                    return new Date(b.createdAt) - new Date(a.createdAt);
+                  } else {
+                    // Ordenar por likes (más likes primero)
+                    return b.likes - b.dislikes - (a.likes - a.dislikes);
+                  }
+                })
                 .map((comment) => (
                   <div
                     key={comment.id}
@@ -890,6 +902,177 @@ export default function ProductoDetalle() {
                         className="inline-flex justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
                       >
                         Enviar valoración
+                      </button>
+                    </div>
+                  </form>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Modal de comentario */}
+      <Transition appear show={showCommentForm} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-10"
+          onClose={() => setShowCommentForm(false)}
+        >
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/10" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                  >
+                    Escribir comentario
+                  </Dialog.Title>
+                  <form onSubmit={handleCommentSubmit} className="mt-4">
+                    <div className="space-y-4">
+                      {/* Selector de mercado */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Mercado
+                        </label>
+                        <select
+                          value={newComment.marketId}
+                          onChange={(e) =>
+                            setNewComment({
+                              ...newComment,
+                              marketId: e.target.value,
+                            })
+                          }
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                          required
+                        >
+                          <option value="">Selecciona un mercado</option>
+                          {product.markets?.map((market) => (
+                            <option key={market.id} value={market.id}>
+                              {market.name} - {market.location}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Valoración */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Valoración
+                        </label>
+                        <div className="flex items-center mt-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() =>
+                                setNewComment({ ...newComment, rating: star })
+                              }
+                              className="p-1"
+                            >
+                              <StarIcon
+                                className={`h-6 w-6 ${
+                                  newComment.rating >= star
+                                    ? "text-yellow-400"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Comentario */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Tu comentario
+                        </label>
+                        <textarea
+                          value={newComment.content}
+                          onChange={(e) =>
+                            setNewComment({
+                              ...newComment,
+                              content: e.target.value,
+                            })
+                          }
+                          rows={4}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                          required
+                        />
+                      </div>
+
+                      {/* Recomendación */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          ¿Recomiendas este producto?
+                        </label>
+                        <div className="mt-1 flex items-center space-x-4">
+                          <label className="inline-flex items-center">
+                            <input
+                              type="radio"
+                              checked={newComment.recommends}
+                              onChange={() =>
+                                setNewComment({
+                                  ...newComment,
+                                  recommends: true,
+                                })
+                              }
+                              className="form-radio text-green-600"
+                            />
+                            <span className="ml-2">Sí</span>
+                          </label>
+                          <label className="inline-flex items-center">
+                            <input
+                              type="radio"
+                              checked={!newComment.recommends}
+                              onChange={() =>
+                                setNewComment({
+                                  ...newComment,
+                                  recommends: false,
+                                })
+                              }
+                              className="form-radio text-red-600"
+                            />
+                            <span className="ml-2">No</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 flex justify-end space-x-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowCommentForm(false)}
+                        className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="inline-flex justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+                      >
+                        Publicar comentario
                       </button>
                     </div>
                   </form>
