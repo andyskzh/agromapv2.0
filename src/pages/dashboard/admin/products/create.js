@@ -106,6 +106,7 @@ export default function CreateProductAdmin() {
           category: selectedBaseProduct.category,
           image: selectedBaseProduct.image,
         }));
+        setPreviewImage(selectedBaseProduct.image);
       }
     }
   };
