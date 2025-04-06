@@ -65,14 +65,19 @@ model ProductBase {
 }
 
 model Comment {
-  id        String   @id @default(cuid())
-  content   String
-  rating    Int
-  userId    String
-  productId String
-  createdAt DateTime @default(now())
-  product   Product  @relation(fields: [productId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  id            String   @id @default(cuid())
+  content       String
+  rating        Int
+  recommends    Boolean  @default(true)
+  marketId      String   // Mercado donde se realizó la compra
+  userId        String
+  productId     String
+  createdAt     DateTime @default(now())
+  likes         Int      @default(0)
+  dislikes      Int      @default(0)
+  product       Product  @relation(fields: [productId], references: [id])
+  user          User     @relation(fields: [userId], references: [id])
+  market        Market   @relation(fields: [marketId], references: [id])
 }
 
 enum Role {
