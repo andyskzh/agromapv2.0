@@ -17,11 +17,12 @@ export default async function handler(req, res) {
     try {
       const { productId, marketId, rating, content, recommends } = req.body;
 
-      // Validaciones
-      if (!productId || !marketId || !rating || !content) {
+      // Validar campos requeridos
+      if (!productId || !marketId || !rating) {
         return res.status(400).json({ error: "Faltan campos requeridos" });
       }
 
+      // Validar rating
       if (rating < 1 || rating > 5) {
         return res
           .status(400)
@@ -46,24 +47,39 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: "Mercado no encontrado" });
       }
 
+      // Crear el comentario
       const comment = await prisma.comment.create({
         data: {
-          content,
-          rating,
-          recommends: recommends || true,
           userId: session.user.id,
           productId,
           marketId,
+          rating,
+          content: content || "", // Permitir comentarios vacíos
+          recommends: recommends ?? true, // Valor por defecto true si no se especifica
           likes: 0,
           dislikes: 0,
         },
         include: {
-          user: true,
-          market: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              image: true,
+            },
+          },
+          market: {
+            select: {
+              id: true,
+              name: true,
+              location: true,
+            },
+          },
         },
       });
 
-      res.status(201).json(comment);
+      await prisma.$disconnect();
+      return res.status(201).json(comment);
     } catch (error) {
       console.error("Error al crear el comentario:", error);
       res.status(500).json({ error: "Error al crear el comentario" });

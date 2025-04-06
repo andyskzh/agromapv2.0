@@ -19,6 +19,7 @@ export default function ProductoDetalle() {
   const [error, setError] = useState(null);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showCommentForm, setShowCommentForm] = useState(false);
+  const [showRatingForm, setShowRatingForm] = useState(false);
   const [currentMarketIndex, setCurrentMarketIndex] = useState(0);
   const [newComment, setNewComment] = useState({
     rating: 5,
@@ -111,6 +112,46 @@ export default function ProductoDetalle() {
     }
   };
 
+  const handleRatingSubmit = async (e) => {
+    e.preventDefault();
+    if (!session) {
+      alert("Debes iniciar sesión para valorar");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/comments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: id,
+          marketId: newComment.marketId,
+          rating: newComment.rating,
+        }),
+      });
+
+      if (res.ok) {
+        // Recargar los comentarios
+        const updatedProduct = await fetch(`/api/public/products/${id}`).then(
+          (res) => res.json()
+        );
+        setProduct(updatedProduct);
+        setShowRatingForm(false);
+        setNewComment({
+          rating: 5,
+          content: "",
+          marketId: "",
+        });
+      } else {
+        throw new Error("Error al enviar la valoración");
+      }
+    } catch (error) {
+      alert("Error al enviar la valoración");
+    }
+  };
+
   // Función para cambiar el mercado actual en el slider
   const handleMarketChange = (index) => {
     setCurrentMarketIndex(index);
@@ -164,6 +205,54 @@ export default function ProductoDetalle() {
 
             {/* Slider de mercados */}
             <div className="relative">
+              {/* Botón anterior */}
+              {currentMarketIndex > 0 && (
+                <button
+                  onClick={() => handleMarketChange(currentMarketIndex - 1)}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 bg-white rounded-full p-2 shadow-md hover:shadow-lg z-10"
+                  aria-label="Mercado anterior"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 text-gray-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+              )}
+
+              {/* Botón siguiente */}
+              {currentMarketIndex < product.markets?.length - 1 && (
+                <button
+                  onClick={() => handleMarketChange(currentMarketIndex + 1)}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 bg-white rounded-full p-2 shadow-md hover:shadow-lg z-10"
+                  aria-label="Siguiente mercado"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 text-gray-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              )}
+
               <div className="overflow-hidden">
                 <div
                   className="flex transition-transform duration-300 ease-in-out"
@@ -227,8 +316,8 @@ export default function ProductoDetalle() {
 
                         {/* Distribución de estrellas */}
                         <div className="space-y-2">
-                          {[5, 4, 3, 2, 1].map((stars, index) => {
-                            const count = ratingDistribution[5 - stars];
+                          {[5, 4, 3, 2, 1].map((stars) => {
+                            const count = ratingDistribution[stars - 1];
                             const percentage =
                               totalRatings > 0
                                 ? (count / totalRatings) * 100
@@ -257,22 +346,6 @@ export default function ProductoDetalle() {
                   })}
                 </div>
               </div>
-              {product.markets?.length > 1 && (
-                <div className="flex justify-center mt-4 space-x-2">
-                  {product.markets.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleMarketChange(index)}
-                      className={`w-2 h-2 rounded-full transition-colors ${
-                        currentMarketIndex === index
-                          ? "bg-green-500"
-                          : "bg-gray-300 hover:bg-gray-400"
-                      }`}
-                      aria-label={`Ir a mercado ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -349,6 +422,54 @@ export default function ProductoDetalle() {
 
             {/* Slider de mercados */}
             <div className="relative">
+              {/* Botón anterior */}
+              {currentMarketIndex > 0 && (
+                <button
+                  onClick={() => handleMarketChange(currentMarketIndex - 1)}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 bg-white rounded-full p-2 shadow-md hover:shadow-lg z-10"
+                  aria-label="Mercado anterior"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 text-gray-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+              )}
+
+              {/* Botón siguiente */}
+              {currentMarketIndex < product.markets?.length - 1 && (
+                <button
+                  onClick={() => handleMarketChange(currentMarketIndex + 1)}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 bg-white rounded-full p-2 shadow-md hover:shadow-lg z-10"
+                  aria-label="Siguiente mercado"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 text-gray-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              )}
+
               <div className="overflow-hidden">
                 <div
                   className="flex transition-transform duration-300 ease-in-out"
@@ -412,8 +533,8 @@ export default function ProductoDetalle() {
 
                         {/* Distribución de estrellas */}
                         <div className="space-y-2">
-                          {[5, 4, 3, 2, 1].map((stars, index) => {
-                            const count = ratingDistribution[5 - stars];
+                          {[5, 4, 3, 2, 1].map((stars) => {
+                            const count = ratingDistribution[stars - 1];
                             const percentage =
                               totalRatings > 0
                                 ? (count / totalRatings) * 100
@@ -442,22 +563,6 @@ export default function ProductoDetalle() {
                   })}
                 </div>
               </div>
-              {product.markets?.length > 1 && (
-                <div className="flex justify-center mt-4 space-x-2">
-                  {product.markets.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleMarketChange(index)}
-                      className={`w-2 h-2 rounded-full transition-colors ${
-                        currentMarketIndex === index
-                          ? "bg-green-500"
-                          : "bg-gray-300 hover:bg-gray-400"
-                      }`}
-                      aria-label={`Ir a mercado ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 
@@ -467,12 +572,20 @@ export default function ProductoDetalle() {
               <h2 className="text-xl font-semibold text-gray-900">
                 Comentarios
               </h2>
-              <button
-                onClick={() => setShowCommentForm(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-              >
-                Escribir comentario
-              </button>
+              <div className="flex flex-wrap gap-4 mt-6">
+                <button
+                  onClick={() => setShowRatingForm(true)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                >
+                  Valorar producto
+                </button>
+                <button
+                  onClick={() => setShowCommentForm(true)}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                >
+                  Escribir comentario
+                </button>
+              </div>
             </div>
 
             {/* Filtros de comentarios */}
@@ -504,103 +617,109 @@ export default function ProductoDetalle() {
 
             {/* Lista de comentarios */}
             <div className="space-y-6">
-              {product.comments.map((comment) => (
-                <div
-                  key={comment.id}
-                  className="border-b border-gray-200 pb-4 last:border-b-0"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-200">
-                        {comment.user.image ? (
-                          <Image
-                            src={comment.user.image}
-                            alt={comment.user.name || comment.user.username}
-                            width={40}
-                            height={40}
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="h-full w-full flex items-center justify-center">
-                            <span className="text-sm font-medium text-gray-600">
-                              {comment.user.name?.[0] ||
-                                comment.user.username?.[0] ||
-                                "U"}
+              {product.comments
+                .filter((comment) => comment.content.trim() !== "") // Solo mostrar comentarios con contenido
+                .map((comment) => (
+                  <div
+                    key={comment.id}
+                    className="border-b border-gray-200 pb-4 last:border-b-0"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-200">
+                          {comment.user.image ? (
+                            <Image
+                              src={comment.user.image}
+                              alt={comment.user.name || comment.user.username}
+                              width={40}
+                              height={40}
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center">
+                              <span className="text-sm font-medium text-gray-600">
+                                {comment.user.name?.[0] ||
+                                  comment.user.username?.[0] ||
+                                  "U"}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="ml-3">
+                          <h3 className="text-sm font-medium text-gray-900">
+                            {comment.user.name || comment.user.username}
+                          </h3>
+                          <div className="flex items-center">
+                            {[0, 1, 2, 3, 4].map((rating) => (
+                              <StarIcon
+                                key={rating}
+                                className={`h-4 w-4 ${
+                                  comment.rating > rating
+                                    ? "text-yellow-400"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            ))}
+                            <span className="ml-1 text-xs text-gray-500">
+                              {comment.rating}/5
                             </span>
                           </div>
-                        )}
-                      </div>
-                      <div className="ml-3">
-                        <h3 className="text-sm font-medium text-gray-900">
-                          {comment.user.name || comment.user.username}
-                        </h3>
-                        <div className="flex items-center">
-                          {[0, 1, 2, 3, 4].map((rating) => (
-                            <StarIcon
-                              key={rating}
-                              className={`h-4 w-4 ${
-                                comment.rating > rating
-                                  ? "text-yellow-400"
-                                  : "text-gray-300"
-                              }`}
-                            />
-                          ))}
-                          <span className="ml-1 text-xs text-gray-500">
-                            {comment.rating}/5
-                          </span>
                         </div>
                       </div>
-                    </div>
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded ${
-                        comment.recommends
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {comment.recommends ? "Recomendable" : "No Recomendable"}
-                    </span>
-                  </div>
-
-                  <p className="text-sm text-gray-600 mt-2">
-                    {comment.content}
-                  </p>
-
-                  <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
-                    <div className="flex items-center">
-                      <MapPinIcon className="h-4 w-4 text-red-500 mr-1" />
-                      <span>{comment.market.name}</span>
-                      <span className="text-gray-400 ml-1">
-                        {comment.market.location}
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded ${
+                          comment.recommends
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {comment.recommends
+                          ? "Recomendable"
+                          : "No Recomendable"}
                       </span>
                     </div>
-                    <div className="flex space-x-4">
-                      <button
-                        className={`flex items-center space-x-1 ${
-                          session
-                            ? "hover:text-green-600"
-                            : "cursor-not-allowed"
-                        }`}
-                        onClick={() => handleVote(comment.id, "like")}
-                        disabled={!session}
-                      >
-                        <ThumbUpIcon className="h-5 w-5" />
-                        <span>{comment.likes}</span>
-                      </button>
-                      <button
-                        className={`flex items-center space-x-1 ${
-                          session ? "hover:text-red-600" : "cursor-not-allowed"
-                        }`}
-                        onClick={() => handleVote(comment.id, "dislike")}
-                        disabled={!session}
-                      >
-                        <ThumbDownIcon className="h-5 w-5" />
-                        <span>{comment.dislikes}</span>
-                      </button>
+
+                    <p className="text-sm text-gray-600 mt-2">
+                      {comment.content}
+                    </p>
+
+                    <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
+                      <div className="flex items-center">
+                        <MapPinIcon className="h-4 w-4 text-red-500 mr-1" />
+                        <span>{comment.market.name}</span>
+                        <span className="text-gray-400 ml-1">
+                          {comment.market.location}
+                        </span>
+                      </div>
+                      <div className="flex space-x-4">
+                        <button
+                          className={`flex items-center space-x-1 ${
+                            session
+                              ? "hover:text-green-600"
+                              : "cursor-not-allowed"
+                          }`}
+                          onClick={() => handleVote(comment.id, "like")}
+                          disabled={!session}
+                        >
+                          <ThumbUpIcon className="h-5 w-5" />
+                          <span>{comment.likes}</span>
+                        </button>
+                        <button
+                          className={`flex items-center space-x-1 ${
+                            session
+                              ? "hover:text-red-600"
+                              : "cursor-not-allowed"
+                          }`}
+                          onClick={() => handleVote(comment.id, "dislike")}
+                          disabled={!session}
+                        >
+                          <ThumbDownIcon className="h-5 w-5" />
+                          <span>{comment.dislikes}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         </div>
@@ -659,6 +778,121 @@ export default function ProductoDetalle() {
                       Cerrar
                     </button>
                   </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Modal de valoración */}
+      <Transition appear show={showRatingForm} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-10"
+          onClose={() => setShowRatingForm(false)}
+        >
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/10" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                  >
+                    Valorar producto
+                  </Dialog.Title>
+                  <form onSubmit={handleRatingSubmit} className="mt-4">
+                    <div className="space-y-4">
+                      {/* Selector de mercado */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Mercado
+                        </label>
+                        <select
+                          value={newComment.marketId}
+                          onChange={(e) =>
+                            setNewComment({
+                              ...newComment,
+                              marketId: e.target.value,
+                            })
+                          }
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                          required
+                        >
+                          <option value="">Selecciona un mercado</option>
+                          {product.markets?.map((market) => (
+                            <option key={market.id} value={market.id}>
+                              {market.name} - {market.location}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Valoración */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Valoración
+                        </label>
+                        <div className="flex items-center mt-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() =>
+                                setNewComment({ ...newComment, rating: star })
+                              }
+                              className="p-1"
+                            >
+                              <StarIcon
+                                className={`h-6 w-6 ${
+                                  newComment.rating >= star
+                                    ? "text-yellow-400"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 flex justify-end space-x-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowRatingForm(false)}
+                        className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="inline-flex justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+                      >
+                        Enviar valoración
+                      </button>
+                    </div>
+                  </form>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
