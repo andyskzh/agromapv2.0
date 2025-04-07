@@ -38,11 +38,12 @@ export default async function handler(req, res) {
     }
   } else if (req.method === "POST") {
     try {
-      const { name, location, description, managerId } = req.body;
+      const { name, location, description, managerId, latitude, longitude } =
+        req.body;
 
-      if (!name || !location) {
+      if (!name || !location || !latitude || !longitude) {
         return res.status(400).json({
-          message: "El nombre y la ubicación son campos requeridos",
+          message: "El nombre, ubicación y coordenadas son campos requeridos",
         });
       }
 
@@ -64,6 +65,8 @@ export default async function handler(req, res) {
           name,
           location,
           description,
+          latitude: parseFloat(latitude),
+          longitude: parseFloat(longitude),
           managerId: managerId || null,
         },
         include: {

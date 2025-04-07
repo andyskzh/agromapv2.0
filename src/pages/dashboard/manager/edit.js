@@ -63,6 +63,8 @@ export default function EditMarket() {
     formData.append("name", e.target.name.value);
     formData.append("location", e.target.location.value);
     formData.append("description", e.target.description.value);
+    formData.append("latitude", e.target.latitude.value);
+    formData.append("longitude", e.target.longitude.value);
 
     if (fileInputRef.current.files[0]) {
       formData.append("image", fileInputRef.current.files[0]);
@@ -186,6 +188,44 @@ export default function EditMarket() {
                 required
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
               />
+            </div>
+
+            {/* Coordenadas */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="latitude"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Latitud
+                </label>
+                <input
+                  type="number"
+                  step="any"
+                  name="latitude"
+                  id="latitude"
+                  defaultValue={market.latitude}
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="longitude"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Longitud
+                </label>
+                <input
+                  type="number"
+                  step="any"
+                  name="longitude"
+                  id="longitude"
+                  defaultValue={market.longitude}
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                />
+              </div>
             </div>
 
             <div>

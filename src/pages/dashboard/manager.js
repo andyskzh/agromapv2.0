@@ -1,7 +1,6 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import Image from "next/image";
 
 export default function ManagerDashboard() {
   const { data: session, status } = useSession();
@@ -119,11 +118,10 @@ export default function ManagerDashboard() {
         <div className="bg-white shadow rounded-lg overflow-hidden">
           {market.image && (
             <div className="relative h-48 w-full">
-              <Image
+              <img
                 src={market.image}
                 alt={market.name}
-                fill
-                className="object-cover"
+                className="w-full h-full object-cover"
               />
             </div>
           )}

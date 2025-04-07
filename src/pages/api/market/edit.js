@@ -84,6 +84,8 @@ export default async function handler(req, res) {
           name: name.toString(),
           location: location.toString(),
           description: description?.toString(),
+          latitude: parseFloat(fields.latitude.toString()),
+          longitude: parseFloat(fields.longitude.toString()),
           image: imageUrl,
         },
       });

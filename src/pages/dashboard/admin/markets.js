@@ -14,6 +14,8 @@ export default function AdminMarketsPage() {
     location: "",
     description: "",
     managerId: "",
+    latitude: "",
+    longitude: "",
   });
   const [managers, setManagers] = useState([]);
 
@@ -101,6 +103,8 @@ export default function AdminMarketsPage() {
           location: "",
           description: "",
           managerId: "",
+          latitude: "",
+          longitude: "",
         });
         fetchMarkets();
       } else {
@@ -167,6 +171,42 @@ export default function AdminMarketsPage() {
               required
               className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
+          </div>
+
+          {/* Coordenadas */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block font-semibold text-green-900 mb-1">
+                Latitud *
+              </label>
+              <input
+                type="number"
+                step="any"
+                value={formData.latitude}
+                onChange={(e) =>
+                  setFormData({ ...formData, latitude: e.target.value })
+                }
+                required
+                className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Ej: 19.4517"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold text-green-900 mb-1">
+                Longitud *
+              </label>
+              <input
+                type="number"
+                step="any"
+                value={formData.longitude}
+                onChange={(e) =>
+                  setFormData({ ...formData, longitude: e.target.value })
+                }
+                required
+                className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Ej: -70.6970"
+              />
+            </div>
           </div>
 
           <div>

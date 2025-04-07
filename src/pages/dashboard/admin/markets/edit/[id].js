@@ -13,6 +13,8 @@ export default function EditMarketAdmin() {
     location: "",
     description: "",
     managerId: "",
+    latitude: "",
+    longitude: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -42,6 +44,8 @@ export default function EditMarketAdmin() {
           location: data.market.location,
           description: data.market.description || "",
           managerId: data.market.managerId,
+          latitude: data.market.latitude,
+          longitude: data.market.longitude,
         });
       }
     } catch (err) {

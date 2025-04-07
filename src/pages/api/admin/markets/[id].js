@@ -40,12 +40,13 @@ export default async function handler(req, res) {
 
   if (req.method === "PUT") {
     try {
-      const { name, location, description, managerId } = req.body;
+      const { name, location, description, managerId, latitude, longitude } =
+        req.body;
 
-      if (!name || !location) {
+      if (!name || !location || !latitude || !longitude) {
         return res
           .status(400)
-          .json({ message: "Nombre y ubicación son requeridos" });
+          .json({ message: "Nombre, ubicación y coordenadas son requeridos" });
       }
 
       const market = await prisma.market.update({
@@ -54,6 +55,8 @@ export default async function handler(req, res) {
           name,
           location,
           description,
+          latitude: parseFloat(latitude),
+          longitude: parseFloat(longitude),
           managerId: managerId || undefined,
         },
         include: {

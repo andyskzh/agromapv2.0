@@ -9,6 +9,8 @@ export default function CreateMarket() {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
@@ -43,6 +45,8 @@ export default function CreateMarket() {
       formData.append("name", name);
       formData.append("location", location);
       formData.append("description", description);
+      formData.append("latitude", latitude);
+      formData.append("longitude", longitude);
 
       // Agregar imagen si existe
       const imageFile = fileInputRef.current?.files[0];
@@ -171,6 +175,38 @@ export default function CreateMarket() {
                 required
                 placeholder="Ej: Calle 23 #123, La Habana"
               />
+            </div>
+
+            {/* Coordenadas */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block font-semibold text-gray-700 mb-2">
+                  Latitud *
+                </label>
+                <input
+                  type="number"
+                  step="any"
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  value={latitude}
+                  onChange={(e) => setLatitude(e.target.value)}
+                  required
+                  placeholder="Ej: 19.4517"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-gray-700 mb-2">
+                  Longitud *
+                </label>
+                <input
+                  type="number"
+                  step="any"
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  value={longitude}
+                  onChange={(e) => setLongitude(e.target.value)}
+                  required
+                  placeholder="Ej: -70.6970"
+                />
+              </div>
             </div>
 
             {/* Descripción */}

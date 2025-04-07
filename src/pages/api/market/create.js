@@ -91,6 +91,14 @@ export default async function handler(req, res) {
         });
       }
 
+      // Verificar que se proporcionen las coordenadas
+      if (!fields.latitude || !fields.longitude) {
+        return res.status(400).json({
+          message: "Datos inválidos",
+          details: "Latitud y longitud son obligatorios",
+        });
+      }
+
       try {
         let imageUrl = null;
 
@@ -108,6 +116,8 @@ export default async function handler(req, res) {
             name: name.toString(),
             location: location.toString(),
             description: description?.toString(),
+            latitude: parseFloat(fields.latitude.toString()),
+            longitude: parseFloat(fields.longitude.toString()),
             image: imageUrl,
             manager: { connect: { id: session.user.id } },
           },

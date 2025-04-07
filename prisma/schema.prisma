@@ -25,6 +25,8 @@ model Market {
   name        String
   description String?
   location    String
+  latitude    Float
+  longitude   Float
   image       String?
   managerId   String
   createdAt   DateTime  @default(now())
