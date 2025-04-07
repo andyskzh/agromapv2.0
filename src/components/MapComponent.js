@@ -1,40 +1,42 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
 
-// Corregir el problema de los íconos de marcadores en Next.js
+// Icono más pequeño para los marcadores
 const icon = L.icon({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
+  iconSize: [20, 32], // Reducido de [25, 41]
+  iconAnchor: [10, 32], // Ajustado proporcionalmente
   popupAnchor: [1, -34],
-  shadowSize: [41, 41],
+  shadowSize: [32, 32], // Reducido proporcionalmente
 });
 
-const MapComponent = ({ markets }) => {
-  const [center, setCenter] = useState([19.4517, -70.697]); // Coordenadas de Santiago, RD
-
+// Componente para manejar el zoom a un mercado específico
+function FlyToMarket({ market, map }) {
   useEffect(() => {
-    // Obtener la ubicación del usuario si está disponible
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCenter([position.coords.latitude, position.coords.longitude]);
-        },
-        (error) => {
-          console.error("Error obteniendo la ubicación:", error);
-        }
-      );
+    if (market && map) {
+      map.flyTo([market.latitude, market.longitude], 15, {
+        duration: 1.5,
+      });
     }
-  }, []);
+  }, [market, map]);
+
+  return null;
+}
+
+const MapComponent = ({ markets, selectedMarket }) => {
+  // Centro inicial en una posición entre Villa Clara y Sancti Spíritus
+  const [center] = useState([22.0749, -79.8007]);
+  const [map, setMap] = useState(null);
 
   return (
     <MapContainer
       center={center}
-      zoom={13}
-      style={{ height: "600px", width: "100%" }}
+      zoom={9}
+      style={{ height: "calc(100vh - 100px)", width: "100%" }}
+      ref={setMap}
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -71,6 +73,7 @@ const MapComponent = ({ markets }) => {
           </Popup>
         </Marker>
       ))}
+      {selectedMarket && <FlyToMarket market={selectedMarket} map={map} />}
     </MapContainer>
   );
 };
