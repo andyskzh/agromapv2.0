@@ -2,6 +2,7 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { FaUserCircle, FaSearch, FaBars, FaTimes } from "react-icons/fa";
 import { useState, useEffect, useRef } from "react";
+import debounce from "lodash/debounce";
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -11,9 +12,16 @@ export default function Navbar() {
   const [showCategories, setShowCategories] = useState(false);
   const [showMobileCategories, setShowMobileCategories] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState({
+    products: [],
+    markets: [],
+  });
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
   const menuRef = useRef(null);
   const mobileRef = useRef(null);
+  const searchRef = useRef(null);
 
   const categorias = [
     { key: "FRUTA", label: "Frutas" },
@@ -23,16 +31,39 @@ export default function Navbar() {
     { key: "OTRO", label: "Otros" },
   ];
 
+  const performSearch = debounce(async (query) => {
+    if (!query.trim()) {
+      setSearchResults({ products: [], markets: [] });
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/search?query=${encodeURIComponent(query)}`
+      );
+      const data = await response.json();
+      setSearchResults(data);
+    } catch (error) {
+      console.error("Error performing search:", error);
+    }
+  }, 300);
+
+  useEffect(() => {
+    performSearch(searchQuery);
+  }, [searchQuery]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
         !menuRef.current?.contains(event.target) &&
-        !mobileRef.current?.contains(event.target)
+        !mobileRef.current?.contains(event.target) &&
+        !searchRef.current?.contains(event.target)
       ) {
         setShowProfileMenu(false);
         setShowCategories(false);
         setMobileMenuOpen(false);
         setShowMobileCategories(false);
+        setShowSearchResults(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -122,13 +153,97 @@ export default function Navbar() {
           className="hidden md:flex items-center space-x-4 relative"
           ref={menuRef}
         >
-          <div className="relative">
+          <div className="relative" ref={searchRef}>
             <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
             <input
               type="text"
-              placeholder="Buscar"
-              className="pl-8 pr-3 py-1 rounded-full text-sm text-black focus:outline-none border border-green-300 focus:ring-2 focus:ring-white"
+              placeholder="Buscar productos y mercados..."
+              className="pl-8 pr-3 py-1 rounded-full text-sm text-black focus:outline-none border border-green-300 focus:ring-2 focus:ring-white w-64"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setShowSearchResults(true);
+              }}
+              onFocus={() => setShowSearchResults(true)}
             />
+            {showSearchResults &&
+              (searchResults.products.length > 0 ||
+                searchResults.markets.length > 0) && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg overflow-hidden z-50 max-h-96 overflow-y-auto">
+                  {searchResults.products.length > 0 && (
+                    <div className="p-2">
+                      <h3 className="text-sm font-semibold text-gray-500 px-2 py-1">
+                        Productos
+                      </h3>
+                      {searchResults.products.map((product) => (
+                        <div
+                          key={product.id}
+                          className="p-2 hover:bg-green-50 cursor-pointer rounded"
+                          onClick={() => {
+                            router.push(`/productos/${product.id}`);
+                            setShowSearchResults(false);
+                            setSearchQuery("");
+                          }}
+                        >
+                          <div className="flex items-center">
+                            {product.image && (
+                              <img
+                                src={product.image}
+                                alt={product.name}
+                                className="w-8 h-8 object-cover rounded mr-2"
+                              />
+                            )}
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {product.name}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {product.market.name}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {searchResults.markets.length > 0 && (
+                    <div className="p-2 border-t">
+                      <h3 className="text-sm font-semibold text-gray-500 px-2 py-1">
+                        Mercados
+                      </h3>
+                      {searchResults.markets.map((market) => (
+                        <div
+                          key={market.id}
+                          className="p-2 hover:bg-green-50 cursor-pointer rounded"
+                          onClick={() => {
+                            router.push(`/establecimientos/${market.id}`);
+                            setShowSearchResults(false);
+                            setSearchQuery("");
+                          }}
+                        >
+                          <div className="flex items-center">
+                            {market.image && (
+                              <img
+                                src={market.image}
+                                alt={market.name}
+                                className="w-8 h-8 object-cover rounded mr-2"
+                              />
+                            )}
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {market.name}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {market.location}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
           </div>
 
           {session?.user ? (
