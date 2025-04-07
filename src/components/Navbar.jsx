@@ -110,7 +110,7 @@ export default function Navbar() {
           </button>
 
           <button
-            onClick={() => router.push("/sobre")}
+            onClick={() => router.push("/sobre-nosotros")}
             className="hover:underline"
           >
             Sobre Nosotros
@@ -225,7 +225,7 @@ export default function Navbar() {
           </button>
 
           <button
-            onClick={() => router.push("/sobre")}
+            onClick={() => router.push("/sobre-nosotros")}
             className="block w-full text-left"
           >
             Sobre Nosotros

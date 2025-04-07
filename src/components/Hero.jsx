@@ -1,4 +1,8 @@
+import { useRouter } from "next/router";
+
 export default function Hero() {
+  const router = useRouter();
+
   return (
     <section
       className="relative w-full h-[440px] bg-cover bg-center flex items-center"
@@ -16,7 +20,10 @@ export default function Hero() {
           mercados cercanos, explore sus beneficios nutricionales y planifique
           su compra desde la comodidad de su hogar.
         </p>
-        <button className="bg-white text-green-600 font-semibold px-5 py-2 rounded hover:bg-green-100 transition">
+        <button
+          onClick={() => router.push("/sobre-nosotros")}
+          className="bg-white text-green-600 font-semibold px-5 py-2 rounded hover:bg-green-100 transition"
+        >
           Sobre Nosotros
         </button>
       </div>
