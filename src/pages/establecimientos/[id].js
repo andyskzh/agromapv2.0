@@ -95,40 +95,64 @@ export default function MarketDetails({ market: initialMarket }) {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header con imagen y datos básicos */}
-      <div className="relative h-[40vh] w-full">
-        {market.image ? (
-          <Image
-            src={market.image}
-            alt={market.name}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-            quality={90}
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-300 flex items-center justify-center">
-            <span className="text-gray-500">Sin imagen</span>
-          </div>
-        )}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-8">
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-4xl font-bold text-white mb-2">
-              {market.name}
-            </h1>
-            <div className="flex items-center text-white">
-              <MapPinIcon className="h-5 w-5 mr-2" />
-              <span>{market.location}</span>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header con imagen e información básica */}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+          <div className="md:flex">
+            {/* Imagen del mercado */}
+            <div className="md:w-1/3 relative h-[300px]">
+              {market.image ? (
+                <Image
+                  src={market.image}
+                  alt={market.name}
+                  fill
+                  priority
+                  className="object-cover"
+                  quality={100}
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500">Sin imagen</span>
+                </div>
+              )}
             </div>
-            {market.description && (
-              <p className="text-white mt-2 max-w-2xl">{market.description}</p>
-            )}
+
+            {/* Información del mercado */}
+            <div className="md:w-2/3 p-6">
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                {market.name}
+              </h1>
+
+              <div className="space-y-3 text-gray-600">
+                <div className="flex items-center">
+                  <MapPinIcon className="h-5 w-5 text-gray-400 mr-2" />
+                  <span>{market.location}</span>
+                </div>
+
+                <div className="flex items-center">
+                  <ClockIcon className="h-5 w-5 text-gray-400 mr-2" />
+                  <span>8:00 am a 5:00 pm</span>
+                </div>
+
+                {market.description && (
+                  <div className="mt-4 text-gray-600">
+                    {market.description.split("\n").map((line, i) => (
+                      <p key={i} className="mb-2">
+                        • {line}
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Título de Productos Disponibles */}
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          Productos Disponibles
+        </h2>
+
         {/* Filtros */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="flex items-center mb-4">
