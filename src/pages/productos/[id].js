@@ -383,7 +383,9 @@ export default function ProductoDetalle() {
                 {product.markets?.map((market) => (
                   <button
                     key={market.id}
-                    onClick={() => router.push(`/mercados/${market.id}`)}
+                    onClick={() =>
+                      router.push(`/establecimientos/${market.id}`)
+                    }
                     className="w-full flex items-center justify-between p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
                   >
                     <div className="flex items-center">

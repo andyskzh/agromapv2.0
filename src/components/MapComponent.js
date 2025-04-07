@@ -64,7 +64,7 @@ const MapComponent = ({ markets, selectedMarket }) => {
               <button
                 className="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                 onClick={() =>
-                  (window.location.href = `/mercados/${market.id}`)
+                  (window.location.href = `/establecimientos/${market.id}`)
                 }
               >
                 Ver más información
