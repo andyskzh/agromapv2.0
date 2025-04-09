@@ -13,23 +13,8 @@ export default function ProductCard({ product }) {
       <h4 className="text-lg font-bold mb-2 text-gray-700">{product.name}</h4>
 
       <div className="text-sm mb-3">
-        <span
-          className={`${
-            product.isAvailable
-              ? "text-green-600 font-medium"
-              : "text-gray-300 line-through"
-          }`}
-        >
-          Disponible
-        </span>{" "}
-        <span
-          className={`${
-            !product.isAvailable
-              ? "text-red-500 font-medium"
-              : "text-gray-300 line-through"
-          }`}
-        >
-          No Disponible
+        <span className="text-green-600 font-medium">
+          Disponible en {product.markets?.length || 0} mercados
         </span>
       </div>
 
