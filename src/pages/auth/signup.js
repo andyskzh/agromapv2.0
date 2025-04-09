@@ -1,44 +1,100 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { FaImage, FaUpload } from "react-icons/fa";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Verificar el tipo de archivo
+    if (!file.type.startsWith("image/")) {
+      setError("Por favor, selecciona un archivo de imagen válido");
+      return;
+    }
+
+    // Verificar el tamaño del archivo (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError("La imagen no debe superar los 5MB");
+      return;
+    }
+
+    setImage(file);
+    // Crear una vista previa de la imagen
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     if (!name || !username || !password || !confirmPassword) {
       setError("Por favor completa todos los campos obligatorios.");
+      setLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
       setError("Las contraseñas no coinciden.");
+      setLoading(false);
       return;
     }
 
-    const res = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, username, password, image }),
-    });
+    try {
+      let imageUrl = "";
+      if (image) {
+        const formData = new FormData();
+        formData.append("file", image);
 
-    const data = await res.json();
+        const uploadResponse = await fetch("/api/auth/upload-signup", {
+          method: "POST",
+          body: formData,
+        });
 
-    if (!res.ok) {
-      setError(data.message || "Error al registrar");
-      return;
+        const uploadData = await uploadResponse.json();
+
+        if (!uploadResponse.ok) {
+          throw new Error(uploadData.message || "Error al subir la imagen");
+        }
+
+        imageUrl = uploadData.url;
+      }
+
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, username, password, image: imageUrl }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Error al registrar");
+        setLoading(false);
+        return;
+      }
+
+      router.push("/auth/signin");
+    } catch (error) {
+      setError("Error al procesar la solicitud");
+      setLoading(false);
     }
-
-    router.push("/auth/signin");
   };
 
   return (
@@ -111,20 +167,44 @@ export default function SignupPage() {
             <label className="block font-semibold text-green-900 mb-1">
               Foto de perfil (opcional):
             </label>
-            <input
-              type="url"
-              placeholder="https://example.com/avatar.jpg"
-              className="w-full border border-gray-300 rounded p-2 text-gray-800"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-            />
+            <div className="flex items-center space-x-4">
+              <div className="flex-shrink-0">
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Vista previa"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-gray-300"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
+                    <FaImage className="w-8 h-8 text-gray-400" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg inline-flex items-center">
+                  <FaUpload className="mr-2" />
+                  <span>Subir imagen</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+                <p className="text-xs text-gray-500 mt-1">
+                  Formatos: JPG, PNG, GIF. Máximo 5MB.
+                </p>
+              </div>
+            </div>
           </div>
 
           <button
             type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded-full font-semibold hover:bg-green-700 transition"
+            disabled={loading}
+            className="w-full bg-green-600 text-white py-2 rounded-full font-semibold hover:bg-green-700 transition disabled:bg-green-300"
           >
-            Crear Cuenta
+            {loading ? "Creando cuenta..." : "Crear Cuenta"}
           </button>
         </form>
 

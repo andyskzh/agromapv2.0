@@ -1,8 +1,9 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "./auth/[...nextauth]";
 import formidable from "formidable";
 import { v2 as cloudinary } from "cloudinary";
+import { Readable } from "stream";
 import fs from "fs";
+import path from "path";
+import { v4 as uuidv4 } from "uuid";
 
 // Configurar Cloudinary
 cloudinary.config({
@@ -19,12 +20,6 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  // Verificar autenticación
-  const session = await getServerSession(req, res, authOptions);
-  if (!session) {
-    return res.status(401).json({ message: "No autorizado" });
-  }
-
   // Solo permitir método POST
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Método no permitido" });
@@ -61,7 +56,7 @@ export default async function handler(req, res) {
     const uploadPromise = new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          folder: "agromap/uploads",
+          folder: "agromap/profiles",
           resource_type: "auto",
         },
         (error, result) => {
