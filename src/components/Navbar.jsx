@@ -9,8 +9,6 @@ export default function Navbar() {
   const router = useRouter();
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [showCategories, setShowCategories] = useState(false);
-  const [showMobileCategories, setShowMobileCategories] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState({
@@ -22,15 +20,6 @@ export default function Navbar() {
   const menuRef = useRef(null);
   const mobileRef = useRef(null);
   const searchRef = useRef(null);
-
-  const categorias = [
-    { key: "todos", label: "Todos los Productos" },
-    { key: "fruta", label: "Frutas" },
-    { key: "hortaliza", label: "Hortalizas" },
-    { key: "vianda", label: "Viandas" },
-    { key: "carne_embutido", label: "Carnes y Embutidos" },
-    { key: "otro", label: "Otros" },
-  ];
 
   const performSearch = debounce(async (query) => {
     if (!query.trim()) {
@@ -61,9 +50,6 @@ export default function Navbar() {
         !searchRef.current?.contains(event.target)
       ) {
         setShowProfileMenu(false);
-        setShowCategories(false);
-        setMobileMenuOpen(false);
-        setShowMobileCategories(false);
         setShowSearchResults(false);
       }
     };
@@ -113,45 +99,12 @@ export default function Navbar() {
             Inicio
           </button>
 
-          <div className="relative">
-            <button
-              onClick={() => setShowCategories(!showCategories)}
-              className="flex items-center hover:text-white/80"
-            >
-              Categorías
-              <svg
-                className={`ml-1 h-4 w-4 transition-transform ${
-                  showCategories ? "rotate-180" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-            {showCategories && (
-              <div className="absolute top-full left-0 mt-1 bg-white text-gray-800 rounded-lg shadow-lg overflow-hidden w-48 py-1 z-50">
-                {categorias.map((cat) => (
-                  <button
-                    key={cat.key}
-                    onClick={() => {
-                      router.push(`/categorias/${cat.key}`);
-                      setShowCategories(false);
-                    }}
-                    className="w-full px-4 py-2 text-left hover:bg-green-50 hover:text-green-600 transition-colors"
-                  >
-                    {cat.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <button
+            onClick={() => router.push("/categorias/todos")}
+            className="hover:text-white/80"
+          >
+            Categorías
+          </button>
 
           <button
             onClick={() => router.push("/establecimientos")}
@@ -330,44 +283,14 @@ export default function Navbar() {
 
           <div>
             <button
-              onClick={() => setShowMobileCategories(!showMobileCategories)}
-              className="flex items-center justify-between w-full py-2"
+              onClick={() => {
+                router.push("/categorias/todos");
+                setMobileMenuOpen(false);
+              }}
+              className="block w-full text-left py-2"
             >
-              <span>Categorías</span>
-              <svg
-                className={`h-4 w-4 transition-transform ${
-                  showMobileCategories ? "rotate-180" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
+              Categorías
             </button>
-
-            {showMobileCategories && (
-              <div className="pl-4 space-y-2 mt-1">
-                {categorias.map((cat) => (
-                  <button
-                    key={cat.key}
-                    onClick={() => {
-                      router.push(`/categorias/${cat.key}`);
-                      setMobileMenuOpen(false);
-                      setShowMobileCategories(false);
-                    }}
-                    className="block w-full text-left py-2 hover:text-white/80"
-                  >
-                    {cat.label}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
           <button
