@@ -28,14 +28,14 @@ export default function Home() {
       })
       .then((data) => {
         console.log("Datos recibidos:", data);
-        
+
         if (!data || !Array.isArray(data.products)) {
           throw new Error("Formato de datos inválido");
         }
 
         const agrupados = {};
         // Inicializar todas las categorías
-        Object.keys(CATEGORIAS).forEach(cat => {
+        Object.keys(CATEGORIAS).forEach((cat) => {
           agrupados[cat] = [];
         });
 
@@ -82,8 +82,13 @@ export default function Home() {
                 <h3 className="text-xl font-bold text-gray-700">
                   {CATEGORIAS[catKey]}
                 </h3>
-                <button className="text-green-900 text-sm hover:underline">
-                  Ver Otros
+                <button
+                  onClick={() =>
+                    router.push(`/categorias/${catKey.toLowerCase()}`)
+                  }
+                  className="text-green-900 text-sm hover:underline"
+                >
+                  Ver Todos
                 </button>
               </div>
 

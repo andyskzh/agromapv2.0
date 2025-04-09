@@ -24,11 +24,12 @@ export default function Navbar() {
   const searchRef = useRef(null);
 
   const categorias = [
-    { key: "FRUTA", label: "Frutas" },
-    { key: "HORTALIZA", label: "Hortalizas" },
-    { key: "VIANDA", label: "Viandas" },
-    { key: "CARNE_EMBUTIDO", label: "Carnes y Embutidos" },
-    { key: "OTRO", label: "Otros" },
+    { key: "todos", label: "Todos los Productos" },
+    { key: "fruta", label: "Frutas" },
+    { key: "hortaliza", label: "Hortalizas" },
+    { key: "vianda", label: "Viandas" },
+    { key: "carne_embutido", label: "Carnes y Embutidos" },
+    { key: "otro", label: "Otros" },
   ];
 
   const performSearch = debounce(async (query) => {
@@ -105,29 +106,48 @@ export default function Navbar() {
           className="hidden md:flex space-x-6 text-sm font-semibold relative"
           ref={menuRef}
         >
-          <button onClick={() => router.push("/")} className="hover:underline">
+          <button
+            onClick={() => router.push("/")}
+            className="hover:text-white/80"
+          >
             Inicio
           </button>
 
           <div className="relative">
             <button
               onClick={() => setShowCategories(!showCategories)}
-              className="hover:underline"
+              className="flex items-center hover:text-white/80"
             >
               Categorías
+              <svg
+                className={`ml-1 h-4 w-4 transition-transform ${
+                  showCategories ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
             </button>
             {showCategories && (
-              <div className="absolute top-8 left-0 bg-white text-black rounded shadow-md w-40 z-10">
+              <div className="absolute top-full left-0 mt-1 bg-white text-gray-800 rounded-lg shadow-lg overflow-hidden w-48 py-1 z-50">
                 {categorias.map((cat) => (
-                  <div
+                  <button
                     key={cat.key}
-                    onClick={() =>
-                      router.push(`/categorias/${cat.key.toLowerCase()}`)
-                    }
-                    className="px-4 py-2 hover:bg-green-100 cursor-pointer"
+                    onClick={() => {
+                      router.push(`/categorias/${cat.key}`);
+                      setShowCategories(false);
+                    }}
+                    className="w-full px-4 py-2 text-left hover:bg-green-50 hover:text-green-600 transition-colors"
                   >
                     {cat.label}
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
@@ -135,14 +155,14 @@ export default function Navbar() {
 
           <button
             onClick={() => router.push("/establecimientos")}
-            className="hover:underline"
+            className="hover:text-white/80"
           >
             Establecimientos
           </button>
 
           <button
             onClick={() => router.push("/sobre-nosotros")}
-            className="hover:underline"
+            className="hover:text-white/80"
           >
             Sobre Nosotros
           </button>
@@ -296,11 +316,14 @@ export default function Navbar() {
       {mobileMenuOpen && (
         <div
           ref={mobileRef}
-          className="md:hidden px-4 pb-4 pt-2 bg-green-500 text-sm font-semibold space-y-3"
+          className="md:hidden px-4 pb-4 pt-2 bg-green-500 text-white text-sm font-semibold space-y-3"
         >
           <button
-            onClick={() => router.push("/")}
-            className="block w-full text-left"
+            onClick={() => {
+              router.push("/");
+              setMobileMenuOpen(false);
+            }}
+            className="block w-full text-left py-2"
           >
             Inicio
           </button>
@@ -308,22 +331,37 @@ export default function Navbar() {
           <div>
             <button
               onClick={() => setShowMobileCategories(!showMobileCategories)}
-              className="block w-full text-left"
+              className="flex items-center justify-between w-full py-2"
             >
-              Categorías {showMobileCategories ? "▲" : "▼"}
+              <span>Categorías</span>
+              <svg
+                className={`h-4 w-4 transition-transform ${
+                  showMobileCategories ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
             </button>
 
             {showMobileCategories && (
-              <div className="pl-4 space-y-1 text-white/90 mt-1">
+              <div className="pl-4 space-y-2 mt-1">
                 {categorias.map((cat) => (
                   <button
                     key={cat.key}
                     onClick={() => {
+                      router.push(`/categorias/${cat.key}`);
                       setMobileMenuOpen(false);
                       setShowMobileCategories(false);
-                      router.push(`/categorias/${cat.key.toLowerCase()}`);
                     }}
-                    className="block w-full text-left hover:underline"
+                    className="block w-full text-left py-2 hover:text-white/80"
                   >
                     {cat.label}
                   </button>
@@ -333,39 +371,24 @@ export default function Navbar() {
           </div>
 
           <button
-            onClick={() => router.push("/establecimientos")}
-            className="block w-full text-left"
+            onClick={() => {
+              router.push("/establecimientos");
+              setMobileMenuOpen(false);
+            }}
+            className="block w-full text-left py-2"
           >
             Establecimientos
           </button>
 
           <button
-            onClick={() => router.push("/sobre-nosotros")}
-            className="block w-full text-left"
+            onClick={() => {
+              router.push("/sobre-nosotros");
+              setMobileMenuOpen(false);
+            }}
+            className="block w-full text-left py-2"
           >
             Sobre Nosotros
           </button>
-
-          {session?.user ? (
-            <>
-              <button
-                onClick={() => router.push("/dashboard")}
-                className="block w-full text-left"
-              >
-                Ir al Dashboard
-              </button>
-              <button
-                onClick={() => signOut()}
-                className="block w-full text-left"
-              >
-                Cerrar Sesión
-              </button>
-            </>
-          ) : (
-            <button onClick={() => signIn()} className="block w-full text-left">
-              Iniciar Sesión
-            </button>
-          )}
         </div>
       )}
     </nav>
