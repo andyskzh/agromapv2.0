@@ -29,6 +29,12 @@ export default async function handler(req, res) {
             location: true,
           },
         },
+        baseProduct: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         comments: {
           select: {
             rating: true,
@@ -37,7 +43,18 @@ export default async function handler(req, res) {
       },
     });
 
-    // Calcular la valoración promedio para cada producto
+    // Agrupar productos por baseProductId para encontrar todos los mercados donde está disponible
+    const productsByBase = {};
+    products.forEach((product) => {
+      if (product.baseProductId) {
+        if (!productsByBase[product.baseProductId]) {
+          productsByBase[product.baseProductId] = [];
+        }
+        productsByBase[product.baseProductId].push(product);
+      }
+    });
+
+    // Calcular la valoración promedio y agregar los mercados disponibles para cada producto
     const productsWithRating = products.map((product) => {
       const ratings = product.comments.map((comment) => comment.rating);
       const averageRating =
@@ -45,9 +62,25 @@ export default async function handler(req, res) {
           ? ratings.reduce((a, b) => a + b, 0) / ratings.length
           : null;
 
+      // Obtener todos los mercados donde está disponible este producto
+      const availableMarkets = product.baseProductId
+        ? productsByBase[product.baseProductId].map((p) => ({
+            id: p.market.id,
+            name: p.market.name,
+            location: p.market.location,
+          }))
+        : [
+            {
+              id: product.market.id,
+              name: product.market.name,
+              location: product.market.location,
+            },
+          ];
+
       return {
         ...product,
         rating: averageRating,
+        markets: availableMarkets,
         comments: undefined, // No necesitamos enviar todos los comentarios
       };
     });
