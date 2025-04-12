@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function AdminUsers() {
   const { data: session, status } = useSession();
@@ -205,20 +206,13 @@ export default function AdminUsers() {
             />
           </div>
 
-          <div>
-            <label className="block font-semibold text-green-900 mb-1">
-              Contraseña *
-            </label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-              required
-              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
+          <PasswordInput
+            value={formData.password}
+            onChange={(e) =>
+              setFormData({ ...formData, password: e.target.value })
+            }
+            required
+          />
 
           <div>
             <label className="block font-semibold text-green-900 mb-1">

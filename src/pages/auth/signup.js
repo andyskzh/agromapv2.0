@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { FaImage, FaUpload } from "react-icons/fa";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -136,32 +137,20 @@ export default function SignupPage() {
             />
           </div>
 
-          <div>
-            <label className="block font-semibold text-green-900 mb-1">
-              Contraseña*:
-            </label>
-            <input
-              type="password"
-              placeholder="Al menos 6 caracteres"
-              className="w-full border border-gray-300 rounded p-2 text-gray-800"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          <PasswordInput
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Al menos 6 caracteres"
+            required
+          />
 
-          <div>
-            <label className="block font-semibold text-green-900 mb-1">
-              Confirmar contraseña*:
-            </label>
-            <input
-              type="password"
-              className="w-full border border-gray-300 rounded p-2"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-          </div>
+          <PasswordInput
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirmar contraseña"
+            required
+            label="Confirmar contraseña"
+          />
 
           <div>
             <label className="block font-semibold text-green-900 mb-1">

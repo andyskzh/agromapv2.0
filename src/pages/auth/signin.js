@@ -2,6 +2,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function SignInPage() {
   const [username, setUsername] = useState("");
@@ -52,19 +53,12 @@ export default function SignInPage() {
             />
           </div>
 
-          <div>
-            <label className="block font-semibold text-green-900 mb-1">
-              Contraseña:
-            </label>
-            <input
-              type="password"
-              placeholder="Tu contraseña"
-              className="w-full border border-gray-300 rounded p-2 text-gray-800"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          <PasswordInput
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Tu contraseña"
+            required
+          />
 
           <button
             type="submit"

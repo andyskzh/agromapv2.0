@@ -13,6 +13,7 @@ import {
   FaUpload,
   FaImage,
 } from "react-icons/fa";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function UserDashboard() {
   const { data: session, status, update } = useSession();
@@ -340,19 +341,14 @@ export default function UserDashboard() {
                 />
               </div>
 
-              <div>
-                <label className="block font-medium text-gray-700 mb-1">
-                  Contraseña (dejar en blanco para mantener la actual)
-                </label>
-                <input
-                  type="password"
-                  value={profileForm.password}
-                  onChange={(e) =>
-                    setProfileForm({ ...profileForm, password: e.target.value })
-                  }
-                  className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-              </div>
+              <PasswordInput
+                value={profileForm.password}
+                onChange={(e) =>
+                  setProfileForm({ ...profileForm, password: e.target.value })
+                }
+                label="Contraseña (dejar en blanco para mantener la actual)"
+                required={false}
+              />
 
               <div>
                 <label className="block font-medium text-gray-700 mb-1">
