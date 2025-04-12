@@ -131,7 +131,7 @@ export default function Navbar() {
             <input
               type="text"
               placeholder="Buscar productos y mercados..."
-              className="pl-8 pr-3 py-1 rounded-full text-sm text-black focus:outline-none border border-green-300 focus:ring-2 focus:ring-white w-64"
+              className="pl-8 pr-3 py-2 rounded-lg text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent w-64 border border-transparent"
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
