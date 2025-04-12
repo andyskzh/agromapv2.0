@@ -45,7 +45,7 @@ export default function EditProduct() {
 
   const fetchProduct = async () => {
     try {
-      const res = await fetch(`/api/products/${id}`);
+      const res = await fetch(`/api/manager/products/${id}`);
       const data = await res.json();
       if (res.ok) {
         setForm({
@@ -140,7 +140,7 @@ export default function EditProduct() {
     setSuccess(false);
 
     try {
-      const res = await fetch(`/api/products/${id}`, {
+      const res = await fetch(`/api/manager/products/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

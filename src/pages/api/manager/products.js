@@ -12,22 +12,24 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "GET") {
-    // Solo los administradores pueden listar todos los productos
-    if (session.user.role !== "ADMIN") {
-      return res.status(403).json({ message: "No autorizado" });
-    }
-
     try {
+      // Obtener el mercado del gestor
+      const market = await prisma.market.findFirst({
+        where: { managerId: session.user.id },
+        select: { id: true },
+      });
+
+      if (!market) {
+        return res
+          .status(404)
+          .json({ message: "No se encontró un mercado asociado a tu cuenta" });
+      }
+
+      // Obtener los productos del mercado del gestor
       const products = await prisma.product.findMany({
+        where: { marketId: market.id },
         orderBy: { createdAt: "desc" },
         include: {
-          market: {
-            select: {
-              id: true,
-              name: true,
-              managerId: true,
-            },
-          },
           baseProduct: {
             select: {
               id: true,
@@ -48,6 +50,18 @@ export default async function handler(req, res) {
 
   if (req.method === "POST") {
     try {
+      // Obtener el mercado del gestor
+      const market = await prisma.market.findFirst({
+        where: { managerId: session.user.id },
+        select: { id: true },
+      });
+
+      if (!market) {
+        return res
+          .status(404)
+          .json({ message: "No se encontró un mercado asociado a tu cuenta" });
+      }
+
       // Verificar si es FormData o JSON
       let data;
       if (req.headers["content-type"]?.includes("multipart/form-data")) {
@@ -81,43 +95,22 @@ export default async function handler(req, res) {
         category,
         isAvailable,
         sasProgram,
-        marketId,
         baseProductId,
         image,
         images = [],
       } = data;
 
       // Validar campos requeridos
-      if (!name || !quantity || !marketId) {
+      if (!name || !quantity) {
         return res.status(400).json({
           message:
-            "Faltan campos requeridos: nombre, cantidad y mercado son obligatorios",
+            "Faltan campos requeridos: nombre y cantidad son obligatorios",
         });
       }
 
       // Validar categoría si se proporciona
       if (category && !Object.values(ProductCategory).includes(category)) {
         return res.status(400).json({ message: "Categoría inválida" });
-      }
-
-      // Verificar si el mercado existe
-      const market = await prisma.market.findUnique({
-        where: { id: marketId },
-        select: { id: true, managerId: true },
-      });
-
-      if (!market) {
-        return res.status(404).json({ message: "Mercado no encontrado" });
-      }
-
-      // Verificar permisos: solo admin o gestor del mercado pueden crear productos
-      if (
-        session.user.role !== "ADMIN" &&
-        session.user.id !== market.managerId
-      ) {
-        return res.status(403).json({
-          message: "No tienes permiso para crear productos en este mercado",
-        });
       }
 
       // Crear el producto
@@ -132,7 +125,7 @@ export default async function handler(req, res) {
           category,
           isAvailable,
           sasProgram,
-          marketId,
+          marketId: market.id, // Usar el ID del mercado del gestor
           baseProductId: baseProductId || null,
           image: image || null,
           images: images || [],

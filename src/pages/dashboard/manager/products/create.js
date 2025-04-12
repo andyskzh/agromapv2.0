@@ -1,12 +1,22 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
-export default function CreateProduct() {
+export default function CreateProductManager() {
   const router = useRouter();
-  const [baseProducts, setBaseProducts] = useState([]);
-  const [previewImage, setPreviewImage] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { data: session, status } = useSession();
+
+  // Redirigir si no está autenticado o no es gestor
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth/signin");
+    } else if (
+      status === "authenticated" &&
+      session?.user?.role !== "MARKET_MANAGER"
+    ) {
+      router.push("/dashboard");
+    }
+  }, [status, session, router]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -20,28 +30,50 @@ export default function CreateProduct() {
     sasProgram: false,
     baseProductId: "",
     image: null,
+    images: [],
   });
+
+  const [baseProducts, setBaseProducts] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
+  const [previewImages, setPreviewImages] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const UNITS = ["kg", "lb", "unidad"];
   const PRICE_TYPES = ["unidad", "lb"];
   const CATEGORIES = ["FRUTA", "HORTALIZA", "VIANDA", "CARNE_EMBUTIDO", "OTRO"];
 
   useEffect(() => {
-    fetchBaseProducts();
-  }, []);
+    if (
+      status === "authenticated" &&
+      session?.user?.role === "MARKET_MANAGER"
+    ) {
+      fetchBaseProducts();
+    }
+  }, [status, session]);
 
   const fetchBaseProducts = async () => {
     try {
-      const res = await fetch("/api/product-bases");
+      const res = await fetch("/api/public/products/base");
       const data = await res.json();
-      if (res.ok) {
-        setBaseProducts(data || []);
-      } else {
-        setError(data.message || "Error al cargar productos base");
+
+      if (!res.ok) {
+        throw new Error(data.message || "Error al cargar productos base");
       }
+
+      if (!data.baseProducts) {
+        console.warn("No se recibieron productos base en la respuesta");
+        setBaseProducts([]);
+        return;
+      }
+
+      setBaseProducts(data.baseProducts);
     } catch (err) {
-      console.error(err);
-      setError("Error al cargar productos base");
+      console.error("Error al cargar productos base:", err);
+      setError(`Error al cargar productos base: ${err.message}`);
+      setBaseProducts([]);
     }
   };
 
@@ -51,45 +83,83 @@ export default function CreateProduct() {
     if (type === "checkbox") {
       setFormData({ ...formData, [name]: checked });
     } else if (type === "file") {
-      // Manejar la subida de imágenes
-      if (files && files.length > 0) {
-        const file = files[0];
-        const reader = new FileReader();
+      if (name === "image") {
+        // Manejar la imagen principal
+        if (files && files.length > 0) {
+          const file = files[0];
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setPreviewImage(reader.result);
+            setFormData({ ...formData, image: reader.result });
+          };
+          reader.readAsDataURL(file);
+        }
+      } else if (name === "images") {
+        // Manejar múltiples imágenes
+        if (files && files.length > 0) {
+          const newImages = [...formData.images];
+          const newPreviewImages = [...previewImages];
 
-        reader.onloadend = () => {
-          setPreviewImage(reader.result);
-          setFormData({ ...formData, image: reader.result });
-        };
+          Array.from(files).forEach((file) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              newImages.push(reader.result);
+              newPreviewImages.push(reader.result);
+              setFormData({ ...formData, images: newImages });
+              setPreviewImages(newPreviewImages);
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+      }
+    } else if (name === "name") {
+      // Manejar el autocompletado del nombre
+      setFormData({ ...formData, [name]: value });
 
-        reader.readAsDataURL(file);
+      // Buscar coincidencias en productos base
+      if (value.length > 2) {
+        const matches = baseProducts.filter((product) =>
+          product.name.toLowerCase().includes(value.toLowerCase())
+        );
+        setSuggestions(matches);
+        setShowSuggestions(true);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    } else if (name === "baseProductId") {
+      // Manejar la selección del producto base
+      const selectedProduct = baseProducts.find((p) => p.id === value);
+      if (selectedProduct) {
+        setFormData({
+          ...formData,
+          name: selectedProduct.name,
+          description: `Información nutricional: ${selectedProduct.nutrition}\n\n${formData.description}`,
+          category: selectedProduct.category,
+          image: selectedProduct.image,
+          baseProductId: value,
+        });
+        setPreviewImage(selectedProduct.image);
+      } else {
+        setFormData({ ...formData, baseProductId: value });
       }
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
-  const handleBaseProductChange = (e) => {
-    const selectedBaseProductId = e.target.value;
-    setFormData((prev) => ({
-      ...prev,
-      baseProductId: selectedBaseProductId,
-    }));
-
-    if (selectedBaseProductId) {
-      const selectedBaseProduct = baseProducts.find(
-        (bp) => bp.id === selectedBaseProductId
-      );
-      if (selectedBaseProduct) {
-        setFormData((prev) => ({
-          ...prev,
-          name: selectedBaseProduct.name,
-          description: `Información nutricional: ${selectedBaseProduct.nutrition}\n\n${prev.description}`,
-          category: selectedBaseProduct.category,
-          image: selectedBaseProduct.image,
-        }));
-        setPreviewImage(selectedBaseProduct.image);
-      }
-    }
+  const handleSuggestionClick = (product) => {
+    setFormData({
+      ...formData,
+      name: product.name,
+      description: `Información nutricional: ${product.nutrition}\n\n${formData.description}`,
+      category: product.category,
+      image: product.image,
+      baseProductId: product.id,
+    });
+    setPreviewImage(product.image);
+    setSuggestions([]);
+    setShowSuggestions(false);
   };
 
   const handleSubmit = async (e) => {
@@ -98,7 +168,7 @@ export default function CreateProduct() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/products/create", {
+      const res = await fetch("/api/manager/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -107,23 +177,39 @@ export default function CreateProduct() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || "Error al crear producto");
-        return;
+        throw new Error(data.message || "Error al crear producto");
       }
 
       router.push("/dashboard/manager/products");
     } catch (err) {
-      console.error(err);
-      setError("Error al crear producto");
+      console.error("Error al crear producto:", err);
+      setError(
+        err.message || "Error al crear producto. Por favor, intenta de nuevo."
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  if (status === "loading") {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Cargando...
+      </div>
+    );
+  }
+
+  if (
+    status === "unauthenticated" ||
+    session?.user?.role !== "MARKET_MANAGER"
+  ) {
+    return null;
+  }
+
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold text-green-800 mb-6 text-center">
-        Añadir producto
+      <h1 className="text-2xl font-bold text-green-900 mb-6 text-center">
+        Crear Producto
       </h1>
 
       {error && (
@@ -133,60 +219,28 @@ export default function CreateProduct() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Producto base */}
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
+        {/* Producto Base */}
+        <div>
+          <label className="block font-semibold text-green-900 mb-1">
             Producto Base
           </label>
           <select
             name="baseProductId"
             value={formData.baseProductId}
-            onChange={handleBaseProductChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            onChange={handleChange}
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
           >
             <option value="">Seleccione un producto base (opcional)</option>
-            {baseProducts.map((baseProduct) => (
-              <option key={baseProduct.id} value={baseProduct.id}>
-                {baseProduct.name}
+            {baseProducts.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.name}
               </option>
             ))}
           </select>
-          <p className="text-sm text-gray-500 mt-1">
-            Al seleccionar un producto base, se copiará su información
-            nutricional en la descripción
-          </p>
         </div>
 
-        {/* Imagen */}
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Imagen:
-          </label>
-          <div className="flex items-center space-x-4">
-            {previewImage && (
-              <div className="w-24 h-24 border rounded overflow-hidden">
-                <img
-                  src={previewImage}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-            <label className="cursor-pointer bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
-              Cambiar imagen
-              <input
-                type="file"
-                name="image"
-                accept="image/*"
-                className="hidden"
-                onChange={handleChange}
-              />
-            </label>
-          </div>
-        </div>
-
-        {/* Nombre */}
-        <div>
+        {/* Nombre con autocompletado */}
+        <div className="relative">
           <label className="block font-semibold text-green-900 mb-1">
             Nombre *
           </label>
@@ -198,43 +252,103 @@ export default function CreateProduct() {
             required
             className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
           />
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg">
+              {suggestions.map((product) => (
+                <div
+                  key={product.id}
+                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleSuggestionClick(product)}
+                >
+                  {product.name}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Categoría */}
+        {/* Imagen principal */}
         <div>
           <label className="block font-semibold text-green-900 mb-1">
-            Categoría
+            Imagen Principal
           </label>
-          <select
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          >
-            {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
+          <div className="flex items-center space-x-4">
+            {previewImage && (
+              <div className="w-24 h-24 border rounded overflow-hidden">
+                <img
+                  src={previewImage}
+                  alt="Vista previa"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            <div className="flex-1">
+              <input
+                type="file"
+                name="image"
+                onChange={handleChange}
+                accept="image/*"
+                className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Imágenes adicionales */}
+        <div>
+          <label className="block font-semibold text-green-900 mb-1">
+            Imágenes Adicionales
+          </label>
+          <div className="grid grid-cols-4 gap-2 mb-2">
+            {previewImages.map((img, index) => (
+              <div key={index} className="relative">
+                <img
+                  src={img}
+                  alt={`Imagen ${index + 1}`}
+                  className="w-full h-24 object-cover rounded"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newImages = [...formData.images];
+                    const newPreviewImages = [...previewImages];
+                    newImages.splice(index, 1);
+                    newPreviewImages.splice(index, 1);
+                    setFormData({ ...formData, images: newImages });
+                    setPreviewImages(newPreviewImages);
+                  }}
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                >
+                  ×
+                </button>
+              </div>
             ))}
-          </select>
+          </div>
+          <input
+            type="file"
+            name="images"
+            onChange={handleChange}
+            accept="image/*"
+            multiple
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
         </div>
 
         {/* Descripción */}
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
+        <div>
+          <label className="block font-semibold text-green-900 mb-1">
             Descripción
           </label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
             rows="4"
-            placeholder="Descripción del producto (la información nutricional se agregará automáticamente si selecciona un producto base)"
           />
         </div>
 
-        {/* Cantidad y unidad */}
+        {/* Cantidad y Unidad */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block font-semibold text-green-900 mb-1">
@@ -260,16 +374,16 @@ export default function CreateProduct() {
               onChange={handleChange}
               className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
-              {UNITS.map((unit) => (
-                <option key={unit} value={unit}>
-                  {unit}
+              {UNITS.map((u) => (
+                <option key={u} value={u}>
+                  {u}
                 </option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* Precio y tipo de precio */}
+        {/* Precio y Tipo */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block font-semibold text-green-900 mb-1">
@@ -287,7 +401,7 @@ export default function CreateProduct() {
           </div>
           <div>
             <label className="block font-semibold text-green-900 mb-1">
-              Tipo de precio
+              Precio por
             </label>
             <select
               name="priceType"
@@ -295,28 +409,45 @@ export default function CreateProduct() {
               onChange={handleChange}
               className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
-              {PRICE_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
+              {PRICE_TYPES.map((p) => (
+                <option key={p} value={p}>
+                  {p}
                 </option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* Opciones adicionales */}
-        <div className="space-y-4">
+        {/* Categoría */}
+        <div>
+          <label className="block font-semibold text-green-900 mb-1">
+            Categoría
+          </label>
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          >
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {c.replace("_", " ")}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Disponibilidad y SAS */}
+        <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center">
             <input
               type="checkbox"
               name="isAvailable"
               checked={formData.isAvailable}
               onChange={handleChange}
-              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+              className="mr-2 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
             />
-            <label className="ml-2 block text-sm text-gray-900">
-              Producto disponible
-            </label>
+            <label className="font-semibold text-green-900">Disponible</label>
           </div>
           <div className="flex items-center">
             <input
@@ -324,28 +455,27 @@ export default function CreateProduct() {
               name="sasProgram"
               checked={formData.sasProgram}
               onChange={handleChange}
-              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+              className="mr-2 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
             />
-            <label className="ml-2 block text-sm text-gray-900">
-              Incluido en programa SAS
-            </label>
+            <label className="font-semibold text-green-900">Programa SAS</label>
           </div>
         </div>
 
-        <div className="flex space-x-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Creando..." : "Crear producto"}
-          </button>
+        {/* Botones */}
+        <div className="flex justify-end space-x-4">
           <button
             type="button"
             onClick={() => router.push("/dashboard/manager/products")}
-            className="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
           >
             Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+          >
+            {loading ? "Creando..." : "Crear Producto"}
           </button>
         </div>
       </form>

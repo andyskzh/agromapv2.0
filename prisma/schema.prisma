@@ -42,6 +42,7 @@ model Product {
   description   String?
   quantity      Int
   image         String?
+  images        String[]        // Array de URLs de imágenes
   isAvailable   Boolean         @default(true)
   sasProgram    Boolean         @default(false)
   marketId      String

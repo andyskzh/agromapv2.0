@@ -1,8 +1,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 export default function CreateProductAdmin() {
   const router = useRouter();
+  const { data: session, status } = useSession();
+
+  // Redirigir si no está autenticado
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth/signin");
+    }
+  }, [status, router]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -17,6 +26,7 @@ export default function CreateProductAdmin() {
     marketId: "",
     baseProductId: "",
     image: null,
+    images: [],
   });
 
   const [markets, setMarkets] = useState([]);
@@ -24,15 +34,20 @@ export default function CreateProductAdmin() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
+  const [previewImages, setPreviewImages] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const UNITS = ["kg", "lb", "unidad"];
   const PRICE_TYPES = ["unidad", "lb"];
   const CATEGORIES = ["FRUTA", "HORTALIZA", "VIANDA", "CARNE_EMBUTIDO", "OTRO"];
 
   useEffect(() => {
-    fetchMarkets();
-    fetchBaseProducts();
-  }, []);
+    if (status === "authenticated") {
+      fetchMarkets();
+      fetchBaseProducts();
+    }
+  }, [status]);
 
   const fetchMarkets = async () => {
     try {
@@ -70,45 +85,83 @@ export default function CreateProductAdmin() {
     if (type === "checkbox") {
       setFormData({ ...formData, [name]: checked });
     } else if (type === "file") {
-      // Manejar la subida de imágenes
-      if (files && files.length > 0) {
-        const file = files[0];
-        const reader = new FileReader();
+      if (name === "image") {
+        // Manejar la imagen principal
+        if (files && files.length > 0) {
+          const file = files[0];
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setPreviewImage(reader.result);
+            setFormData({ ...formData, image: reader.result });
+          };
+          reader.readAsDataURL(file);
+        }
+      } else if (name === "images") {
+        // Manejar múltiples imágenes
+        if (files && files.length > 0) {
+          const newImages = [...formData.images];
+          const newPreviewImages = [...previewImages];
 
-        reader.onloadend = () => {
-          setPreviewImage(reader.result);
-          setFormData({ ...formData, image: reader.result });
-        };
+          Array.from(files).forEach((file) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              newImages.push(reader.result);
+              newPreviewImages.push(reader.result);
+              setFormData({ ...formData, images: newImages });
+              setPreviewImages(newPreviewImages);
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+      }
+    } else if (name === "name") {
+      // Manejar el autocompletado del nombre
+      setFormData({ ...formData, [name]: value });
 
-        reader.readAsDataURL(file);
+      // Buscar coincidencias en productos base
+      if (value.length > 2) {
+        const matches = baseProducts.filter((product) =>
+          product.name.toLowerCase().includes(value.toLowerCase())
+        );
+        setSuggestions(matches);
+        setShowSuggestions(true);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    } else if (name === "baseProductId") {
+      // Manejar la selección del producto base
+      const selectedProduct = baseProducts.find((p) => p.id === value);
+      if (selectedProduct) {
+        setFormData({
+          ...formData,
+          name: selectedProduct.name,
+          description: `Información nutricional: ${selectedProduct.nutrition}\n\n${formData.description}`,
+          category: selectedProduct.category,
+          image: selectedProduct.image,
+          baseProductId: value,
+        });
+        setPreviewImage(selectedProduct.image);
+      } else {
+        setFormData({ ...formData, baseProductId: value });
       }
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
-  const handleBaseProductChange = (e) => {
-    const selectedBaseProductId = e.target.value;
-    setFormData((prev) => ({
-      ...prev,
-      baseProductId: selectedBaseProductId,
-    }));
-
-    if (selectedBaseProductId) {
-      const selectedBaseProduct = baseProducts.find(
-        (bp) => bp.id === selectedBaseProductId
-      );
-      if (selectedBaseProduct) {
-        setFormData((prev) => ({
-          ...prev,
-          name: selectedBaseProduct.name,
-          description: `Información nutricional: ${selectedBaseProduct.nutrition}\n\n${prev.description}`,
-          category: selectedBaseProduct.category,
-          image: selectedBaseProduct.image,
-        }));
-        setPreviewImage(selectedBaseProduct.image);
-      }
-    }
+  const handleSuggestionClick = (product) => {
+    setFormData({
+      ...formData,
+      name: product.name,
+      description: `Información nutricional: ${product.nutrition}\n\n${formData.description}`,
+      category: product.category,
+      image: product.image,
+      baseProductId: product.id,
+    });
+    setPreviewImage(product.image);
+    setSuggestions([]);
+    setShowSuggestions(false);
   };
 
   const handleSubmit = async (e) => {
@@ -139,6 +192,14 @@ export default function CreateProductAdmin() {
     }
   };
 
+  if (status === "loading") {
+    return <div>Cargando...</div>;
+  }
+
+  if (status === "unauthenticated") {
+    return null;
+  }
+
   return (
     <div className="max-w-3xl mx-auto p-6">
       <h1 className="text-2xl font-bold text-green-900 mb-6 text-center">
@@ -153,27 +214,118 @@ export default function CreateProductAdmin() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Producto Base */}
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
+        <div>
+          <label className="block font-semibold text-green-900 mb-1">
             Producto Base
           </label>
           <select
             name="baseProductId"
             value={formData.baseProductId}
-            onChange={handleBaseProductChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            onChange={handleChange}
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
           >
             <option value="">Seleccione un producto base (opcional)</option>
-            {baseProducts.map((baseProduct) => (
-              <option key={baseProduct.id} value={baseProduct.id}>
-                {baseProduct.name}
+            {baseProducts.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.name}
               </option>
             ))}
           </select>
-          <p className="text-sm text-gray-500 mt-1">
-            Al seleccionar un producto base, se copiará su información
-            nutricional en la descripción
-          </p>
+        </div>
+
+        {/* Nombre con autocompletado */}
+        <div className="relative">
+          <label className="block font-semibold text-green-900 mb-1">
+            Nombre *
+          </label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg">
+              {suggestions.map((product) => (
+                <div
+                  key={product.id}
+                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleSuggestionClick(product)}
+                >
+                  {product.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Imagen principal */}
+        <div>
+          <label className="block font-semibold text-green-900 mb-1">
+            Imagen Principal
+          </label>
+          <div className="flex items-center space-x-4">
+            {previewImage && (
+              <div className="w-24 h-24 border rounded overflow-hidden">
+                <img
+                  src={previewImage}
+                  alt="Vista previa"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            <div className="flex-1">
+              <input
+                type="file"
+                name="image"
+                onChange={handleChange}
+                accept="image/*"
+                className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Imágenes adicionales */}
+        <div>
+          <label className="block font-semibold text-green-900 mb-1">
+            Imágenes Adicionales
+          </label>
+          <div className="grid grid-cols-4 gap-2 mb-2">
+            {previewImages.map((img, index) => (
+              <div key={index} className="relative">
+                <img
+                  src={img}
+                  alt={`Imagen ${index + 1}`}
+                  className="w-full h-24 object-cover rounded"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newImages = [...formData.images];
+                    const newPreviewImages = [...previewImages];
+                    newImages.splice(index, 1);
+                    newPreviewImages.splice(index, 1);
+                    setFormData({ ...formData, images: newImages });
+                    setPreviewImages(newPreviewImages);
+                  }}
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+          <input
+            type="file"
+            name="images"
+            onChange={handleChange}
+            accept="image/*"
+            multiple
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
         </div>
 
         {/* Mercado */}
@@ -186,7 +338,7 @@ export default function CreateProductAdmin() {
             value={formData.marketId}
             onChange={handleChange}
             required
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
           >
             <option value="">Selecciona un mercado</option>
             {markets.map((m) => (
@@ -195,21 +347,6 @@ export default function CreateProductAdmin() {
               </option>
             ))}
           </select>
-        </div>
-
-        {/* Nombre */}
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Nombre *
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
         </div>
 
         {/* Descripción */}
@@ -337,36 +474,6 @@ export default function CreateProductAdmin() {
               className="mr-2 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
             />
             <label className="font-semibold text-green-900">Programa SAS</label>
-          </div>
-        </div>
-
-        {/* Imagen */}
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Imagen
-          </label>
-          <div className="flex items-center space-x-4">
-            {previewImage && (
-              <div className="w-24 h-24 border rounded overflow-hidden">
-                <img
-                  src={previewImage}
-                  alt="Vista previa"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-            <div className="flex-1">
-              <input
-                type="file"
-                name="image"
-                onChange={handleChange}
-                accept="image/*"
-                className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                Sube una imagen para el producto o selecciona un producto base.
-              </p>
-            </div>
           </div>
         </div>
 
