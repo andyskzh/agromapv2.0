@@ -34,7 +34,13 @@ export default async function handler(req, res) {
         market: true,
         comments: {
           include: {
-            user: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
           },
         },
       },
@@ -67,6 +73,9 @@ export default async function handler(req, res) {
       priceType: p.priceType,
       quantity: p.quantity,
       unit: p.unit,
+      productId: p.id,
+      image: p.image,
+      images: p.images,
     }));
 
     // Obtener los mercados para cada comentario

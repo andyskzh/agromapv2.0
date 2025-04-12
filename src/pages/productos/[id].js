@@ -383,9 +383,16 @@ export default function ProductoDetalle() {
                 {product.markets?.map((market) => (
                   <button
                     key={market.id}
-                    onClick={() =>
-                      router.push(`/establecimientos/${market.id}`)
-                    }
+                    onClick={() => {
+                      if (!market.productId) {
+                        console.error(
+                          "No se encontró el ID del producto para el mercado:",
+                          market
+                        );
+                        return;
+                      }
+                      router.push(`/productos/mercado/${market.productId}`);
+                    }}
                     className="w-full flex items-center justify-between p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
                   >
                     <div className="flex items-center">

@@ -45,12 +45,14 @@ export default async function handler(req, res) {
             id: p.market.id,
             name: p.market.name,
             location: p.market.location,
+            productId: p.id,
           }))
         : [
             {
               id: product.market.id,
               name: product.market.name,
               location: product.market.location,
+              productId: product.id,
             },
           ];
 
