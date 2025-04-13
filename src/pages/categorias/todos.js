@@ -127,7 +127,7 @@ export default function AllProductsPage() {
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <div className="flex items-center mb-6">
           <FunnelIcon className="h-5 w-5 text-gray-500 mr-2" />
-          <h2 className="text-lg font-semibold">Filtros</h2>
+          <h2 className="text-lg font-semibold text-gray-800">Filtros</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
@@ -141,7 +141,7 @@ export default function AllProductsPage() {
               onChange={(e) =>
                 setFilters({ ...filters, category: e.target.value })
               }
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
             >
               {categories.map((cat) => (
                 <option key={cat.key} value={cat.key}>
@@ -161,7 +161,7 @@ export default function AllProductsPage() {
               onChange={(e) =>
                 setFilters({ ...filters, market: e.target.value })
               }
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
               disabled={loadingMarkets}
             >
               <option value="TODOS">
@@ -188,7 +188,7 @@ export default function AllProductsPage() {
               onChange={(e) =>
                 setFilters({ ...filters, rating: e.target.value })
               }
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
             >
               <option value="TODOS">Todas las valoraciones</option>
               <option value="4+">4+ estrellas</option>
@@ -206,7 +206,7 @@ export default function AllProductsPage() {
               onChange={(e) =>
                 setFilters({ ...filters, availability: e.target.value })
               }
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
             >
               <option value="TODOS">Todos</option>
               <option value="DISPONIBLE">Disponibles</option>
@@ -224,7 +224,7 @@ export default function AllProductsPage() {
               onChange={(e) =>
                 setFilters({ ...filters, priceRange: e.target.value })
               }
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
             >
               <option value="TODOS">Todos los precios</option>
               <option value="BAJO">Menos de $50</option>
@@ -243,7 +243,7 @@ export default function AllProductsPage() {
               onChange={(e) =>
                 setFilters({ ...filters, sortBy: e.target.value })
               }
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
             >
               <option value="NONE">Sin ordenar</option>
               <option value="RATING_DESC">Mejor valorados</option>
