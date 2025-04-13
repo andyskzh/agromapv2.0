@@ -90,7 +90,7 @@ export default function CreateBaseProductAdmin() {
             value={form.name}
             onChange={handleChange}
             required
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           />
         </div>
 
@@ -104,7 +104,7 @@ export default function CreateBaseProductAdmin() {
             value={form.category}
             onChange={handleChange}
             required
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           >
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>
@@ -124,7 +124,7 @@ export default function CreateBaseProductAdmin() {
             value={form.nutrition}
             onChange={handleChange}
             rows={4}
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             placeholder="Ingrese la información nutricional del producto"
           />
         </div>
@@ -151,7 +151,7 @@ export default function CreateBaseProductAdmin() {
                 onChange={handleChange}
                 accept="image/*"
                 required
-                className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
               />
               <p className="text-sm text-gray-500 mt-1">
                 Sube una imagen para el producto base.

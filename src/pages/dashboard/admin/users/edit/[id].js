@@ -128,7 +128,7 @@ export default function EditUserAdmin() {
             type="text"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           />
         </div>
 
@@ -143,7 +143,7 @@ export default function EditUserAdmin() {
               setFormData({ ...formData, username: e.target.value })
             }
             required
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           />
         </div>
 
@@ -164,7 +164,7 @@ export default function EditUserAdmin() {
             value={formData.role}
             onChange={(e) => setFormData({ ...formData, role: e.target.value })}
             required
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           >
             <option value="USER">Usuario</option>
             <option value="MARKET_MANAGER">Gestor de Mercado</option>

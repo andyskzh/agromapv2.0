@@ -607,22 +607,32 @@ export default function ProductoDetalle() {
             {/* Filtros de comentarios */}
             <div className="flex flex-wrap gap-2 mb-4">
               <select
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800"
                 value={commentFilter}
                 onChange={(e) => setCommentFilter(e.target.value)}
               >
-                <option value="recent">Más recientes</option>
-                <option value="liked">Más valorados</option>
+                <option value="recent" className="text-gray-800">
+                  Más recientes
+                </option>
+                <option value="liked" className="text-gray-800">
+                  Más valorados
+                </option>
               </select>
 
               <select
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800"
                 value={marketFilter}
                 onChange={(e) => setMarketFilter(e.target.value)}
               >
-                <option value="">Todos los mercados</option>
+                <option value="" className="text-gray-800">
+                  Todos los mercados
+                </option>
                 {product.markets?.map((market) => (
-                  <option key={market.id} value={market.id}>
+                  <option
+                    key={market.id}
+                    value={market.id}
+                    className="text-gray-800"
+                  >
                     {market.name}
                   </option>
                 ))}
@@ -852,7 +862,7 @@ export default function ProductoDetalle() {
                     <div className="space-y-4">
                       {/* Selector de mercado */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-sm font-medium text-gray-800 mb-1">
                           Mercado
                         </label>
                         <select
@@ -863,12 +873,18 @@ export default function ProductoDetalle() {
                               marketId: e.target.value,
                             })
                           }
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
                           required
                         >
-                          <option value="">Selecciona un mercado</option>
+                          <option value="" className="text-gray-800">
+                            Selecciona un mercado
+                          </option>
                           {product.markets?.map((market) => (
-                            <option key={market.id} value={market.id}>
+                            <option
+                              key={market.id}
+                              value={market.id}
+                              className="text-gray-800"
+                            >
                               {market.name} - {market.location}
                             </option>
                           ))}
@@ -877,7 +893,7 @@ export default function ProductoDetalle() {
 
                       {/* Valoración */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-sm font-medium text-gray-800 mb-1">
                           Valoración
                         </label>
                         <div className="flex items-center mt-1">
@@ -967,7 +983,7 @@ export default function ProductoDetalle() {
                     <div className="space-y-4">
                       {/* Selector de mercado */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-sm font-medium text-gray-800 mb-1">
                           Mercado
                         </label>
                         <select
@@ -978,12 +994,18 @@ export default function ProductoDetalle() {
                               marketId: e.target.value,
                             })
                           }
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
                           required
                         >
-                          <option value="">Selecciona un mercado</option>
+                          <option value="" className="text-gray-800">
+                            Selecciona un mercado
+                          </option>
                           {product.markets?.map((market) => (
-                            <option key={market.id} value={market.id}>
+                            <option
+                              key={market.id}
+                              value={market.id}
+                              className="text-gray-800"
+                            >
                               {market.name} - {market.location}
                             </option>
                           ))}
@@ -992,7 +1014,7 @@ export default function ProductoDetalle() {
 
                       {/* Valoración */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-sm font-medium text-gray-800 mb-1">
                           Valoración
                         </label>
                         <div className="flex items-center mt-1">
@@ -1019,7 +1041,7 @@ export default function ProductoDetalle() {
 
                       {/* Comentario */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-sm font-medium text-gray-800 mb-1">
                           Tu comentario
                         </label>
                         <textarea
@@ -1031,14 +1053,14 @@ export default function ProductoDetalle() {
                             })
                           }
                           rows={4}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
                           required
                         />
                       </div>
 
                       {/* Recomendación */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-sm font-medium text-gray-800 mb-1">
                           ¿Recomiendas este producto?
                         </label>
                         <div className="mt-1 flex items-center space-x-4">
@@ -1054,7 +1076,7 @@ export default function ProductoDetalle() {
                               }
                               className="form-radio text-green-600"
                             />
-                            <span className="ml-2">Sí</span>
+                            <span className="ml-2 text-gray-800">Sí</span>
                           </label>
                           <label className="inline-flex items-center">
                             <input
@@ -1068,7 +1090,7 @@ export default function ProductoDetalle() {
                               }
                               className="form-radio text-red-600"
                             />
-                            <span className="ml-2">No</span>
+                            <span className="ml-2 text-gray-800">No</span>
                           </label>
                         </div>
                       </div>

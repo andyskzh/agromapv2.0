@@ -187,7 +187,7 @@ export default function AdminUsers() {
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             />
           </div>
 
@@ -202,7 +202,7 @@ export default function AdminUsers() {
                 setFormData({ ...formData, username: e.target.value })
               }
               required
-              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             />
           </div>
 
@@ -224,7 +224,7 @@ export default function AdminUsers() {
                 setFormData({ ...formData, role: e.target.value })
               }
               required
-              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             >
               <option value="USER">Usuario</option>
               <option value="MARKET_MANAGER">Gestor de Mercado</option>
@@ -248,14 +248,14 @@ export default function AdminUsers() {
             placeholder="Buscar por nombre o usuario..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           />
         </div>
         <div className="w-full md:w-48">
           <select
             value={filterRole}
             onChange={(e) => setFilterRole(e.target.value)}
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           >
             <option value="ALL">Todos los roles</option>
             <option value="USER">Usuarios</option>
@@ -324,7 +324,7 @@ export default function AdminUsers() {
                       onChange={(e) =>
                         handleRoleChange(user.id, e.target.value)
                       }
-                      className="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
                     >
                       <option value="USER">Usuario</option>
                       <option value="MARKET_MANAGER">Gestor</option>

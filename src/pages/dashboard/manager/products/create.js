@@ -228,7 +228,7 @@ export default function CreateProductManager() {
             name="baseProductId"
             value={formData.baseProductId}
             onChange={handleChange}
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           >
             <option value="">Seleccione un producto base (opcional)</option>
             {baseProducts.map((product) => (
@@ -250,7 +250,7 @@ export default function CreateProductManager() {
             value={formData.name}
             onChange={handleChange}
             required
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           />
           {showSuggestions && suggestions.length > 0 && (
             <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg">
@@ -288,7 +288,7 @@ export default function CreateProductManager() {
                 name="image"
                 onChange={handleChange}
                 accept="image/*"
-                className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
               />
             </div>
           </div>
@@ -330,7 +330,7 @@ export default function CreateProductManager() {
             onChange={handleChange}
             accept="image/*"
             multiple
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           />
         </div>
 
@@ -343,7 +343,7 @@ export default function CreateProductManager() {
             name="description"
             value={formData.description}
             onChange={handleChange}
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             rows="4"
           />
         </div>
@@ -361,7 +361,7 @@ export default function CreateProductManager() {
               onChange={handleChange}
               required
               min="0"
-              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             />
           </div>
           <div>
@@ -372,7 +372,7 @@ export default function CreateProductManager() {
               name="unit"
               value={formData.unit}
               onChange={handleChange}
-              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             >
               {UNITS.map((u) => (
                 <option key={u} value={u}>
@@ -396,7 +396,7 @@ export default function CreateProductManager() {
               onChange={handleChange}
               min="0"
               step="0.01"
-              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             />
           </div>
           <div>
@@ -407,7 +407,7 @@ export default function CreateProductManager() {
               name="priceType"
               value={formData.priceType}
               onChange={handleChange}
-              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             >
               {PRICE_TYPES.map((p) => (
                 <option key={p} value={p}>
@@ -427,7 +427,7 @@ export default function CreateProductManager() {
             name="category"
             value={formData.category}
             onChange={handleChange}
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           >
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>

@@ -313,8 +313,8 @@ export default function UserDashboard() {
             </h2>
             <form onSubmit={handleProfileSubmit} className="space-y-4">
               <div>
-                <label className="block font-medium text-gray-700 mb-1">
-                  Nombre completo
+                <label className="block font-semibold text-green-900 mb-1">
+                  Nombre completo:
                 </label>
                 <input
                   type="text"
@@ -322,13 +322,13 @@ export default function UserDashboard() {
                   onChange={(e) =>
                     setProfileForm({ ...profileForm, name: e.target.value })
                   }
-                  className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded p-2 text-gray-800"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-gray-700 mb-1">
-                  Nombre de usuario *
+                <label className="block font-semibold text-green-900 mb-1">
+                  Nombre de usuario:
                 </label>
                 <input
                   type="text"
@@ -336,8 +336,7 @@ export default function UserDashboard() {
                   onChange={(e) =>
                     setProfileForm({ ...profileForm, username: e.target.value })
                   }
-                  required
-                  className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded p-2 text-gray-800"
                 />
               </div>
 
@@ -351,7 +350,7 @@ export default function UserDashboard() {
               />
 
               <div>
-                <label className="block font-medium text-gray-700 mb-1">
+                <label className="block font-semibold text-green-900 mb-1">
                   Imagen de perfil
                 </label>
                 <div className="flex items-center space-x-4">
@@ -394,8 +393,8 @@ export default function UserDashboard() {
               </div>
 
               <div>
-                <label className="block font-medium text-gray-700 mb-1">
-                  URL de imagen de perfil (alternativa)
+                <label className="block font-semibold text-green-900 mb-1">
+                  URL de imagen de perfil:
                 </label>
                 <input
                   type="text"
@@ -404,8 +403,7 @@ export default function UserDashboard() {
                     setProfileForm({ ...profileForm, image: e.target.value });
                     setImagePreview(e.target.value);
                   }}
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                  className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded p-2 text-gray-800"
                 />
               </div>
 

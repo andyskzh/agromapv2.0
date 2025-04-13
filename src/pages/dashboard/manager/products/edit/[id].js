@@ -201,7 +201,7 @@ export default function EditProduct() {
             name="baseProductId"
             value={form.baseProductId}
             onChange={handleBaseProductChange}
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           >
             <option value="">Selecciona un producto base</option>
             {baseProducts.map((bp) => (
@@ -255,7 +255,7 @@ export default function EditProduct() {
             value={form.name}
             onChange={handleChange}
             required
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           />
         </div>
 
@@ -268,7 +268,7 @@ export default function EditProduct() {
             name="category"
             value={form.category}
             onChange={handleChange}
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           >
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>
@@ -287,7 +287,7 @@ export default function EditProduct() {
             name="description"
             value={form.description}
             onChange={handleChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
             rows="4"
             placeholder="Descripción del producto (la información nutricional se agregará automáticamente si selecciona un producto base)"
           />
@@ -306,7 +306,7 @@ export default function EditProduct() {
               onChange={handleChange}
               required
               min="0"
-              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             />
           </div>
           <div>
@@ -317,7 +317,7 @@ export default function EditProduct() {
               name="unit"
               value={form.unit}
               onChange={handleChange}
-              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             >
               {UNITS.map((unit) => (
                 <option key={unit} value={unit}>
@@ -341,7 +341,7 @@ export default function EditProduct() {
               onChange={handleChange}
               min="0"
               step="0.01"
-              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             />
           </div>
           <div>
@@ -352,7 +352,7 @@ export default function EditProduct() {
               name="priceType"
               value={form.priceType}
               onChange={handleChange}
-              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             >
               {PRICE_TYPES.map((type) => (
                 <option key={type} value={type}>

@@ -729,7 +729,7 @@ export default function ProductoMercadoDetalle() {
 
                       {/* Comentario */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-sm font-medium text-gray-800">
                           Tu comentario
                         </label>
                         <textarea
@@ -741,14 +741,14 @@ export default function ProductoMercadoDetalle() {
                             })
                           }
                           rows={4}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
                           required
                         />
                       </div>
 
                       {/* Recomendación */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-sm font-medium text-gray-800">
                           ¿Recomiendas este producto?
                         </label>
                         <div className="mt-1 flex items-center space-x-4">
@@ -764,7 +764,7 @@ export default function ProductoMercadoDetalle() {
                               }
                               className="form-radio text-green-600"
                             />
-                            <span className="ml-2">Sí</span>
+                            <span className="ml-2 text-gray-800">Sí</span>
                           </label>
                           <label className="inline-flex items-center">
                             <input
@@ -778,7 +778,7 @@ export default function ProductoMercadoDetalle() {
                               }
                               className="form-radio text-red-600"
                             />
-                            <span className="ml-2">No</span>
+                            <span className="ml-2 text-gray-800">No</span>
                           </label>
                         </div>
                       </div>

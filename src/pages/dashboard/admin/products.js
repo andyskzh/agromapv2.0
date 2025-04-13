@@ -116,14 +116,14 @@ export default function AdminProductsPage() {
             placeholder="Buscar por nombre, descripción o mercado..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           >
             <option value="ALL">Todas las categorías</option>
             <option value="FRUTA">Frutas</option>
@@ -135,7 +135,7 @@ export default function AdminProductsPage() {
           <select
             value={filterAvailability}
             onChange={(e) => setFilterAvailability(e.target.value)}
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           >
             <option value="ALL">Todos los estados</option>
             <option value="AVAILABLE">Disponibles</option>

@@ -108,14 +108,14 @@ export default function AdminComments() {
             placeholder="Buscar por contenido, usuario o producto..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           />
         </div>
         <div>
           <select
             value={filterRating}
             onChange={(e) => setFilterRating(e.target.value)}
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           >
             <option value="ALL">Todas las calificaciones</option>
             <option value="1">1 estrella</option>

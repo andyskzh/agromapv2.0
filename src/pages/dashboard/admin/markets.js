@@ -154,7 +154,7 @@ export default function AdminMarketsPage() {
                 setFormData({ ...formData, name: e.target.value })
               }
               required
-              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             />
           </div>
 
@@ -169,7 +169,7 @@ export default function AdminMarketsPage() {
                 setFormData({ ...formData, location: e.target.value })
               }
               required
-              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             />
           </div>
 
@@ -187,7 +187,7 @@ export default function AdminMarketsPage() {
                   setFormData({ ...formData, latitude: e.target.value })
                 }
                 required
-                className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
                 placeholder="Ej: 19.4517"
               />
             </div>
@@ -203,7 +203,7 @@ export default function AdminMarketsPage() {
                   setFormData({ ...formData, longitude: e.target.value })
                 }
                 required
-                className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
                 placeholder="Ej: -70.6970"
               />
             </div>
@@ -219,7 +219,7 @@ export default function AdminMarketsPage() {
                 setFormData({ ...formData, description: e.target.value })
               }
               rows={3}
-              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             />
           </div>
 
@@ -232,7 +232,7 @@ export default function AdminMarketsPage() {
               onChange={(e) =>
                 setFormData({ ...formData, managerId: e.target.value })
               }
-              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             >
               <option value="">Sin gestor asignado</option>
               {managers.map((manager) => (

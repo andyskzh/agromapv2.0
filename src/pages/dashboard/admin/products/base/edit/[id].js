@@ -145,7 +145,7 @@ export default function EditBaseProductAdmin() {
             value={form.name}
             onChange={handleChange}
             required
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           />
         </div>
 
@@ -159,7 +159,7 @@ export default function EditBaseProductAdmin() {
             value={form.category}
             onChange={handleChange}
             required
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           >
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>
@@ -179,7 +179,7 @@ export default function EditBaseProductAdmin() {
             value={form.nutrition}
             onChange={handleChange}
             rows={4}
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             placeholder="Ingrese la información nutricional del producto"
           />
         </div>
@@ -204,7 +204,7 @@ export default function EditBaseProductAdmin() {
               name="image"
               onChange={handleChange}
               accept="image/*"
-              className="flex-1"
+              className="flex-1 text-gray-800"
             />
           </div>
         </div>

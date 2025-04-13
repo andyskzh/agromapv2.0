@@ -121,7 +121,7 @@ export default function EditMarketAdmin() {
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             required
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           />
         </div>
 
@@ -136,7 +136,7 @@ export default function EditMarketAdmin() {
               setFormData({ ...formData, location: e.target.value })
             }
             required
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           />
         </div>
 
@@ -150,7 +150,7 @@ export default function EditMarketAdmin() {
               setFormData({ ...formData, description: e.target.value })
             }
             rows={3}
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           />
         </div>
 
@@ -163,7 +163,7 @@ export default function EditMarketAdmin() {
             onChange={(e) =>
               setFormData({ ...formData, managerId: e.target.value })
             }
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           >
             <option value="">Sin gestor asignado</option>
             {managers.map((manager) => (

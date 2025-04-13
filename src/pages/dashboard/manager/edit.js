@@ -169,7 +169,7 @@ export default function EditMarket() {
                 id="name"
                 defaultValue={market.name}
                 required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
               />
             </div>
 
@@ -186,7 +186,7 @@ export default function EditMarket() {
                 id="location"
                 defaultValue={market.location}
                 required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
               />
             </div>
 
@@ -206,7 +206,7 @@ export default function EditMarket() {
                   id="latitude"
                   defaultValue={market.latitude}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
                 />
               </div>
               <div>
@@ -223,7 +223,7 @@ export default function EditMarket() {
                   id="longitude"
                   defaultValue={market.longitude}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
                 />
               </div>
             </div>
@@ -240,7 +240,7 @@ export default function EditMarket() {
                 id="description"
                 rows={4}
                 defaultValue={market.description || ""}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
               />
             </div>
 

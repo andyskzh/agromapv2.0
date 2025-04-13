@@ -220,7 +220,7 @@ export default function EditProductAdmin() {
             name="baseProductId"
             value={form.baseProductId}
             onChange={handleBaseProductChange}
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           >
             <option value="">Selecciona un producto base</option>
             {baseProducts.map((bp) => (
@@ -245,7 +245,7 @@ export default function EditProductAdmin() {
             value={form.marketId}
             onChange={handleChange}
             required
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           >
             <option value="">Selecciona un mercado</option>
             {markets.map((m) => (
@@ -267,7 +267,7 @@ export default function EditProductAdmin() {
             value={form.name}
             onChange={handleChange}
             required
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           />
         </div>
 
@@ -281,7 +281,7 @@ export default function EditProductAdmin() {
             value={form.description}
             onChange={handleChange}
             rows={3}
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           />
         </div>
 
@@ -298,7 +298,7 @@ export default function EditProductAdmin() {
               onChange={handleChange}
               required
               min="0"
-              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             />
           </div>
           <div>
@@ -309,7 +309,7 @@ export default function EditProductAdmin() {
               name="unit"
               value={form.unit}
               onChange={handleChange}
-              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             >
               {UNITS.map((u) => (
                 <option key={u} value={u}>
@@ -333,7 +333,7 @@ export default function EditProductAdmin() {
               onChange={handleChange}
               min="0"
               step="0.01"
-              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             />
           </div>
           <div>
@@ -344,7 +344,7 @@ export default function EditProductAdmin() {
               name="priceType"
               value={form.priceType}
               onChange={handleChange}
-              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             >
               {PRICE_TYPES.map((p) => (
                 <option key={p} value={p}>
@@ -364,7 +364,7 @@ export default function EditProductAdmin() {
             name="category"
             value={form.category}
             onChange={handleChange}
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
           >
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>
@@ -419,7 +419,7 @@ export default function EditProductAdmin() {
                 name="image"
                 onChange={handleChange}
                 accept="image/*"
-                className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
               />
               <p className="text-sm text-gray-500 mt-1">
                 Sube una imagen para el producto o selecciona un producto base.
