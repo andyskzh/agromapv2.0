@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { FaImage, FaUpload } from "react-icons/fa";
 import PasswordInput from "@/components/PasswordInput";
+import Image from "next/image";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -159,11 +160,14 @@ export default function SignupPage() {
             <div className="flex items-center space-x-4">
               <div className="flex-shrink-0">
                 {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    alt="Vista previa"
-                    className="w-20 h-20 rounded-full object-cover border-2 border-gray-300"
-                  />
+                  <div className="relative w-32 h-32">
+                    <Image
+                      src={imagePreview}
+                      alt="Vista previa"
+                      fill
+                      className="object-cover rounded-full"
+                    />
+                  </div>
                 ) : (
                   <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
                     <FaImage className="w-8 h-8 text-gray-400" />
