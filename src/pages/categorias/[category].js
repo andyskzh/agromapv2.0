@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import ProductCard from "@/components/ProductCard";
+import MarketProductCard from "@/components/MarketProductCard";
 import {
   FunnelIcon,
   MapPinIcon,
@@ -28,7 +29,8 @@ export default function CategoryPage() {
     market: "TODOS",
     rating: "TODOS",
     availability: "TODOS",
-    priceRange: "TODOS",
+    priceMin: "",
+    priceMax: "",
     sortBy: "NONE",
   });
   const [markets, setMarkets] = useState([]);
@@ -63,7 +65,7 @@ export default function CategoryPage() {
       const res = await fetch("/api/markets");
       const data = await res.json();
       if (res.ok) {
-        setMarkets(data.markets || []);
+        setMarkets(data || []);
       }
     } catch (err) {
       console.error("Error al cargar mercados:", err);
@@ -75,22 +77,17 @@ export default function CategoryPage() {
 
   const filteredProducts = products.filter((product) => {
     const matchesMarket =
-      filters.market === "TODOS" || product.marketId === filters.market;
+      filters.market === "TODOS" ||
+      (product.market && product.market.id.toString() === filters.market);
     const matchesRating =
-      filters.rating === "TODOS" ||
-      (filters.rating === "4+" && product.rating >= 4) ||
-      (filters.rating === "3+" && product.rating >= 3);
+      filters.rating === "TODOS" || product.rating >= parseInt(filters.rating);
     const matchesAvailability =
       filters.availability === "TODOS" ||
       (filters.availability === "DISPONIBLE" && product.isAvailable) ||
       (filters.availability === "NO_DISPONIBLE" && !product.isAvailable);
     const matchesPriceRange =
-      filters.priceRange === "TODOS" ||
-      (filters.priceRange === "BAJO" && product.price < 50) ||
-      (filters.priceRange === "MEDIO" &&
-        product.price >= 50 &&
-        product.price < 100) ||
-      (filters.priceRange === "ALTO" && product.price >= 100);
+      (!filters.priceMin || product.price >= parseFloat(filters.priceMin)) &&
+      (!filters.priceMax || product.price <= parseFloat(filters.priceMax));
 
     return (
       matchesMarket && matchesRating && matchesAvailability && matchesPriceRange
@@ -160,7 +157,7 @@ export default function CategoryPage() {
           {/* Filtro por Valoración */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Valoración
+              Valoración mínima
             </label>
             <select
               value={filters.rating}
@@ -170,8 +167,11 @@ export default function CategoryPage() {
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
             >
               <option value="TODOS">Todas las valoraciones</option>
-              <option value="4+">4+ estrellas</option>
-              <option value="3+">3+ estrellas</option>
+              <option value="5">⭐⭐⭐⭐⭐ (5 estrellas)</option>
+              <option value="4">⭐⭐⭐⭐ (4 estrellas o más)</option>
+              <option value="3">⭐⭐⭐ (3 estrellas o más)</option>
+              <option value="2">⭐⭐ (2 estrellas o más)</option>
+              <option value="1">⭐ (1 estrella o más)</option>
             </select>
           </div>
 
@@ -198,18 +198,29 @@ export default function CategoryPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Rango de Precio
             </label>
-            <select
-              value={filters.priceRange}
-              onChange={(e) =>
-                setFilters({ ...filters, priceRange: e.target.value })
-              }
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
-            >
-              <option value="TODOS">Todos los precios</option>
-              <option value="BAJO">Menos de $50</option>
-              <option value="MEDIO">$50 - $100</option>
-              <option value="ALTO">Más de $100</option>
-            </select>
+            <div className="flex gap-2 items-center">
+              <input
+                type="number"
+                placeholder="Mín"
+                value={filters.priceMin}
+                onChange={(e) =>
+                  setFilters({ ...filters, priceMin: e.target.value })
+                }
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
+                min="0"
+              />
+              <span className="text-gray-500">-</span>
+              <input
+                type="number"
+                placeholder="Máx"
+                value={filters.priceMax}
+                onChange={(e) =>
+                  setFilters({ ...filters, priceMax: e.target.value })
+                }
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
+                min="0"
+              />
+            </div>
           </div>
 
           {/* Ordenar por */}
@@ -248,7 +259,7 @@ export default function CategoryPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {sortedProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <MarketProductCard key={product.id} product={product} />
           ))}
         </div>
       )}

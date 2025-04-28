@@ -36,18 +36,37 @@ export default function Home() {
         const agrupados = {};
         // Inicializar todas las categorías
         Object.keys(CATEGORIAS).forEach((cat) => {
-          agrupados[cat] = [];
+          agrupados[cat] = new Map(); // Usamos Map para evitar duplicados por ID base
         });
 
         data.products.forEach((producto) => {
-          if (producto.category && agrupados[producto.category] !== undefined) {
-            agrupados[producto.category].push(producto);
-          } else {
-            agrupados.OTRO.push(producto);
+          const categoria = producto.category || "OTRO";
+          if (agrupados[categoria]) {
+            // Si el producto ya existe en la categoría, actualizamos sus mercados
+            if (agrupados[categoria].has(producto.baseProductId)) {
+              const productoExistente = agrupados[categoria].get(
+                producto.baseProductId
+              );
+              if (producto.markets) {
+                productoExistente.markets = [
+                  ...(productoExistente.markets || []),
+                  ...producto.markets,
+                ];
+              }
+            } else {
+              // Si es un nuevo producto base, lo agregamos
+              agrupados[categoria].set(producto.baseProductId, producto);
+            }
           }
         });
 
-        setProductosPorCategoria(agrupados);
+        // Convertir los Map a arrays para el renderizado
+        const productosAgrupados = {};
+        Object.keys(agrupados).forEach((cat) => {
+          productosAgrupados[cat] = Array.from(agrupados[cat].values());
+        });
+
+        setProductosPorCategoria(productosAgrupados);
         setIsLoading(false);
       })
       .catch((error) => {
@@ -65,46 +84,70 @@ export default function Home() {
       {/* PRODUCTOS */}
       <section className="py-10 px-6 max-w-7xl mx-auto bg-gray-50">
         <h2 className="text-3xl font-bold text-green-800 mb-8 text-center">
-          Productos
+          Productos Disponibles
         </h2>
 
-        {Object.keys(CATEGORIAS).map((catKey) => {
-          const productos = productosPorCategoria[catKey] || [];
-          if (productos.length === 0) return null;
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Cargando productos...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12 text-red-600">{error}</div>
+        ) : (
+          Object.keys(CATEGORIAS).map((catKey) => {
+            const productos = productosPorCategoria[catKey] || [];
 
-          return (
-            <div
-              key={catKey}
-              className="mb-12 bg-green-100 p-6 rounded-lg shadow"
-            >
-              {/* Encabezado de categoría */}
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-700">
-                  {CATEGORIAS[catKey]}
-                </h3>
-                <button
-                  onClick={() =>
-                    router.push(`/categorias/${catKey.toLowerCase()}`)
-                  }
-                  className="text-green-900 text-sm hover:underline"
-                >
-                  Ver Todos
-                </button>
-              </div>
+            return (
+              <div
+                key={catKey}
+                className="mb-12 bg-white p-6 rounded-lg shadow"
+              >
+                {/* Encabezado de categoría */}
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-700">
+                    {CATEGORIAS[catKey]}
+                  </h3>
+                  <button
+                    onClick={() =>
+                      router.push(`/categorias/${catKey.toLowerCase()}`)
+                    }
+                    className="text-green-600 text-sm hover:text-green-700 font-medium"
+                  >
+                    Ver Todos
+                  </button>
+                </div>
 
-              {/* Lista de productos */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {productos.slice(0, 3).map((producto) => (
-                  <ProductCard key={producto.id} product={producto} />
-                ))}
+                {/* Lista de productos */}
+                {productos.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {productos.slice(0, 4).map((producto) => (
+                      <ProductCard
+                        key={producto.baseProductId}
+                        product={producto}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No hay productos disponibles en esta categoría.</p>
+                    <p className="text-sm mt-2">
+                      Los productos aparecerán aquí cuando los mercados los
+                      agreguen.
+                    </p>
+                  </div>
+                )}
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
 
         <div className="text-center mt-10">
-          <button className="bg-green-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-green-700">
-            Ver más ⌄
+          <button
+            onClick={() => router.push("/categorias/todos")}
+            className="bg-green-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-green-700 transition-colors"
+          >
+            Ver Todos los Productos
           </button>
         </div>
       </section>

@@ -21,7 +21,19 @@ export default async function handler(req, res) {
       where: {
         category: categoryEnum,
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        quantity: true,
+        image: true,
+        images: true,
+        isAvailable: true,
+        sasProgram: true,
+        price: true,
+        priceType: true,
+        unit: true,
+        category: true,
         market: {
           select: {
             id: true,
@@ -33,6 +45,7 @@ export default async function handler(req, res) {
           select: {
             id: true,
             name: true,
+            image: true,
           },
         },
         comments: {

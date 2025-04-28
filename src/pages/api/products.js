@@ -9,7 +9,19 @@ export default async function handler(req, res) {
 
   try {
     const products = await prisma.product.findMany({
-      include: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        quantity: true,
+        image: true,
+        images: true,
+        isAvailable: true,
+        sasProgram: true,
+        price: true,
+        priceType: true,
+        unit: true,
+        category: true,
         market: {
           select: {
             id: true,
@@ -21,6 +33,7 @@ export default async function handler(req, res) {
           select: {
             id: true,
             name: true,
+            image: true,
           },
         },
         comments: {
@@ -81,5 +94,7 @@ export default async function handler(req, res) {
     return res.status(500).json({
       message: "Error al obtener los productos",
     });
+  } finally {
+    await prisma.$disconnect();
   }
 }
