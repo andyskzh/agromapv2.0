@@ -94,28 +94,28 @@ export default function Navbar() {
         >
           <button
             onClick={() => router.push("/")}
-            className="hover:text-white/80"
+            className="hover:text-white/80 cursor-pointer"
           >
             Inicio
           </button>
 
           <button
             onClick={() => router.push("/categorias/todos")}
-            className="hover:text-white/80"
+            className="hover:text-white/80 cursor-pointer"
           >
             Categorías
           </button>
 
           <button
             onClick={() => router.push("/establecimientos")}
-            className="hover:text-white/80"
+            className="hover:text-white/80 cursor-pointer"
           >
             Establecimientos
           </button>
 
           <button
             onClick={() => router.push("/sobre-nosotros")}
-            className="hover:text-white/80"
+            className="hover:text-white/80 cursor-pointer"
           >
             Sobre Nosotros
           </button>
@@ -276,7 +276,7 @@ export default function Navbar() {
               router.push("/");
               setMobileMenuOpen(false);
             }}
-            className="block w-full text-left py-2"
+            className="block w-full text-left py-2 cursor-pointer"
           >
             Inicio
           </button>
@@ -287,7 +287,7 @@ export default function Navbar() {
                 router.push("/categorias/todos");
                 setMobileMenuOpen(false);
               }}
-              className="block w-full text-left py-2"
+              className="block w-full text-left py-2 cursor-pointer"
             >
               Categorías
             </button>
@@ -298,7 +298,7 @@ export default function Navbar() {
               router.push("/establecimientos");
               setMobileMenuOpen(false);
             }}
-            className="block w-full text-left py-2"
+            className="block w-full text-left py-2 cursor-pointer"
           >
             Establecimientos
           </button>
@@ -308,7 +308,7 @@ export default function Navbar() {
               router.push("/sobre-nosotros");
               setMobileMenuOpen(false);
             }}
-            className="block w-full text-left py-2"
+            className="block w-full text-left py-2 cursor-pointer"
           >
             Sobre Nosotros
           </button>
