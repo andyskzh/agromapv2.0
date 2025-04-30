@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { FaUserCircle, FaSearch, FaBars, FaTimes } from "react-icons/fa";
 import { useState, useEffect, useRef } from "react";
 import debounce from "lodash/debounce";
+import Link from "next/link";
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -119,6 +120,13 @@ export default function Navbar() {
           >
             Sobre Nosotros
           </button>
+
+          <button
+            onClick={() => router.push("/contacto")}
+            className="hover:text-white/80 cursor-pointer"
+          >
+            Contacto
+          </button>
         </div>
 
         {/* Search + Perfil (Desktop) */}
@@ -153,19 +161,24 @@ export default function Navbar() {
                           key={product.id}
                           className="p-2 hover:bg-green-50 cursor-pointer rounded"
                           onClick={() => {
-                            router.push(`/productos/${product.id}`);
+                            router.push(`/productos/mercado/${product.id}`);
                             setShowSearchResults(false);
                             setSearchQuery("");
                           }}
                         >
                           <div className="flex items-center">
-                            {product.image && (
+                            <div className="w-16 h-16 mr-3 flex-shrink-0">
                               <img
-                                src={product.image}
+                                src={
+                                  product.images?.[0] ||
+                                  product.image ||
+                                  product.baseProduct?.image ||
+                                  "/placeholder-product.jpg"
+                                }
                                 alt={product.name}
-                                className="w-8 h-8 object-cover rounded mr-2"
+                                className="w-full h-full object-cover rounded"
                               />
-                            )}
+                            </div>
                             <div>
                               <div className="text-sm font-medium text-gray-900">
                                 {product.name}
@@ -213,6 +226,26 @@ export default function Navbar() {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  )}
+                  {(searchResults.products.length > 0 ||
+                    searchResults.markets.length > 0) && (
+                    <div className="p-2 border-t">
+                      <div
+                        className="p-2 hover:bg-green-50 cursor-pointer rounded text-center text-sm font-medium text-green-600"
+                        onClick={() => {
+                          router.push(
+                            `/busqueda?q=${encodeURIComponent(searchQuery)}`
+                          );
+                          setShowSearchResults(false);
+                          setSearchQuery("");
+                        }}
+                      >
+                        Ver todos los resultados (
+                        {searchResults.products.length +
+                          searchResults.markets.length}
+                        )
+                      </div>
                     </div>
                   )}
                 </div>
@@ -311,6 +344,16 @@ export default function Navbar() {
             className="block w-full text-left py-2 cursor-pointer"
           >
             Sobre Nosotros
+          </button>
+
+          <button
+            onClick={() => {
+              router.push("/contacto");
+              setMobileMenuOpen(false);
+            }}
+            className="block w-full text-left py-2 cursor-pointer"
+          >
+            Contacto
           </button>
         </div>
       )}

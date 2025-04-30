@@ -22,8 +22,9 @@ export default async function handler(req, res) {
         },
         include: {
           market: true,
+          comments: true,
         },
-        take: 5,
+        take: 50,
       }),
       prisma.market.findMany({
         where: {
@@ -37,8 +38,18 @@ export default async function handler(req, res) {
       }),
     ]);
 
+    // Calcular la valoración promedio para cada producto
+    const productsWithRating = products.map((product) => ({
+      ...product,
+      rating:
+        product.comments.length > 0
+          ? product.comments.reduce((acc, comment) => acc + comment.rating, 0) /
+            product.comments.length
+          : 0,
+    }));
+
     return res.status(200).json({
-      products,
+      products: productsWithRating,
       markets,
     });
   } catch (error) {
