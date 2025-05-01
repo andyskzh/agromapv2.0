@@ -8,8 +8,9 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Obtener todos los productos con sus mercados
     const products = await prisma.product.findMany({
-      orderBy: { createdAt: "desc" },
+      orderBy: { updatedAt: "desc" },
       include: {
         market: {
           select: {
@@ -22,8 +23,20 @@ export default async function handler(req, res) {
           select: {
             id: true,
             name: true,
+            image: true,
+            category: true,
           },
         },
+      },
+    });
+
+    // Obtener todos los productos base
+    const baseProducts = await prisma.productBase.findMany({
+      select: {
+        id: true,
+        name: true,
+        image: true,
+        category: true,
       },
     });
 
@@ -38,31 +51,38 @@ export default async function handler(req, res) {
       }
     });
 
-    // Agregar los mercados disponibles para cada producto
-    const productsWithMarkets = products.map((product) => {
-      const availableMarkets = product.baseProductId
-        ? productsByBase[product.baseProductId].map((p) => ({
-            id: p.market.id,
-            name: p.market.name,
-            location: p.market.location,
-            productId: p.id,
-          }))
-        : [
-            {
-              id: product.market.id,
-              name: product.market.name,
-              location: product.market.location,
-              productId: product.id,
-            },
-          ];
+    // Crear un array con todos los productos, incluyendo los base sin productos asociados
+    const allProducts = baseProducts.map((baseProduct) => {
+      const associatedProducts = productsByBase[baseProduct.id] || [];
+      const availableMarkets = associatedProducts.map((p) => ({
+        id: p.market.id,
+        name: p.market.name,
+        location: p.market.location,
+        productId: p.id,
+      }));
 
       return {
-        ...product,
+        id: baseProduct.id,
+        baseProductId: baseProduct.id,
+        name: baseProduct.name,
+        image: baseProduct.image,
+        category: baseProduct.category,
         markets: availableMarkets,
+        lastUpdated:
+          associatedProducts.length > 0
+            ? Math.max(
+                ...associatedProducts.map((p) =>
+                  new Date(p.updatedAt).getTime()
+                )
+              )
+            : 0,
       };
     });
 
-    return res.status(200).json({ products: productsWithMarkets });
+    // Ordenar productos por fecha de actualización
+    allProducts.sort((a, b) => b.lastUpdated - a.lastUpdated);
+
+    return res.status(200).json({ products: allProducts });
   } catch (error) {
     console.error("Error al obtener productos públicos:", error);
     return res.status(500).json({ message: "Error al obtener los productos" });

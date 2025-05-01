@@ -1,6 +1,12 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
-import { FaUserCircle, FaSearch, FaBars, FaTimes } from "react-icons/fa";
+import {
+  FaUserCircle,
+  FaSearch,
+  FaBars,
+  FaTimes,
+  FaUser,
+} from "react-icons/fa";
 import { useState, useEffect, useRef } from "react";
 import debounce from "lodash/debounce";
 import Link from "next/link";
@@ -58,6 +64,26 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleSearch = (e) => {
+    if (e.key === "Enter" || e.type === "click") {
+      if (searchQuery.trim()) {
+        router.push(`/busqueda?q=${encodeURIComponent(searchQuery.trim())}`);
+        setSearchQuery("");
+        setShowSearchResults(false);
+        setMobileMenuOpen(false);
+      }
+    }
+  };
+
+  const handleSearchClick = () => {
+    if (searchQuery.trim()) {
+      router.push(`/busqueda?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+      setShowSearchResults(false);
+      setMobileMenuOpen(false);
+    }
+  };
+
   return (
     <nav className="bg-green-600 text-white">
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
@@ -94,17 +120,17 @@ export default function Navbar() {
           ref={menuRef}
         >
           <button
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/sobre-nosotros")}
             className="hover:text-white/80 cursor-pointer"
           >
-            Inicio
+            Sobre Nosotros
           </button>
 
           <button
             onClick={() => router.push("/categorias/todos")}
             className="hover:text-white/80 cursor-pointer"
           >
-            Categorías
+            Productos
           </button>
 
           <button
@@ -112,13 +138,6 @@ export default function Navbar() {
             className="hover:text-white/80 cursor-pointer"
           >
             Establecimientos
-          </button>
-
-          <button
-            onClick={() => router.push("/sobre-nosotros")}
-            className="hover:text-white/80 cursor-pointer"
-          >
-            Sobre Nosotros
           </button>
 
           <button
@@ -252,6 +271,7 @@ export default function Navbar() {
               )}
           </div>
 
+          {/* Perfil de usuario */}
           {session?.user ? (
             <div className="relative">
               {session.user.image ? (
@@ -272,7 +292,7 @@ export default function Navbar() {
               )}
 
               {showProfileMenu && (
-                <div className="absolute right-0 mt-2 w-40 bg-white text-black rounded shadow-md z-10">
+                <div className="absolute right-0 mt-2 w-40 bg-white text-black rounded shadow-md z-[1000]">
                   <div
                     onClick={() => router.push("/dashboard")}
                     className="px-4 py-2 hover:bg-green-100 cursor-pointer"
@@ -298,64 +318,186 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Menú Mobile desplegable */}
+      {/* Menú Móvil */}
       {mobileMenuOpen && (
-        <div
-          ref={mobileRef}
-          className="md:hidden px-4 pb-4 pt-2 bg-green-500 text-white text-sm font-semibold space-y-3"
-        >
-          <button
-            onClick={() => {
-              router.push("/");
-              setMobileMenuOpen(false);
-            }}
-            className="block w-full text-left py-2 cursor-pointer"
-          >
-            Inicio
-          </button>
+        <>
+          {/* Fondo difuminado */}
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <div className="fixed inset-0 z-50">
+            <div className="fixed inset-y-0 right-0 w-full max-w-xs bg-white shadow-xl">
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <div className="flex items-center justify-between p-4 bg-green-600 text-white">
+                  <h2 className="text-xl font-bold">Menú</h2>
+                  <button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-white hover:text-green-200"
+                  >
+                    <FaTimes size={24} />
+                  </button>
+                </div>
 
-          <div>
-            <button
-              onClick={() => {
-                router.push("/categorias/todos");
-                setMobileMenuOpen(false);
-              }}
-              className="block w-full text-left py-2 cursor-pointer"
-            >
-              Categorías
-            </button>
+                {/* Search bar in mobile menu */}
+                <div className="p-4 bg-white">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Buscar productos..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyPress={handleSearch}
+                      className="w-full pl-4 pr-10 py-3 border-2 border-green-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800 font-medium"
+                    />
+                    <button
+                      onClick={handleSearchClick}
+                      className="absolute right-3 top-4 text-green-600 hover:text-green-700"
+                    >
+                      <FaSearch className="text-xl" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* User profile in mobile menu */}
+                <div className="p-4 bg-white border-t border-gray-200">
+                  {session ? (
+                    <div className="flex flex-col space-y-4">
+                      <div className="flex items-center space-x-3">
+                        {session.user.image ? (
+                          <img
+                            src={session.user.image}
+                            alt="Foto de perfil"
+                            className="w-14 h-14 rounded-full object-cover border-2 border-green-600"
+                          />
+                        ) : (
+                          <div className="w-14 h-14 rounded-full bg-green-600 flex items-center justify-center border-2 border-green-600">
+                            <FaUser className="text-white text-2xl" />
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-bold text-gray-800 text-lg">
+                            {session.user.name}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {session.user.email}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => {
+                            router.push("/dashboard");
+                            setMobileMenuOpen(false);
+                          }}
+                          className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors font-semibold text-sm"
+                        >
+                          Dashboard
+                        </button>
+                        <button
+                          onClick={() => {
+                            signOut();
+                            setMobileMenuOpen(false);
+                          }}
+                          className="flex-1 border-2 border-green-600 text-green-600 py-2 px-4 rounded-lg hover:bg-green-50 transition-colors font-semibold text-sm"
+                        >
+                          Cerrar Sesión
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col space-y-3">
+                      <div className="text-center">
+                        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
+                          <FaUser className="text-green-600 text-3xl" />
+                        </div>
+                        <p className="text-gray-800 font-semibold">
+                          ¿No tienes una cuenta?
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Únete a nuestra comunidad
+                        </p>
+                      </div>
+                      <div className="flex space-x-4">
+                        <button
+                          onClick={() => {
+                            signIn();
+                            setMobileMenuOpen(false);
+                          }}
+                          className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                        >
+                          Iniciar Sesión
+                        </button>
+                        <button
+                          onClick={() => {
+                            router.push("/auth/signup");
+                            setMobileMenuOpen(false);
+                          }}
+                          className="flex-1 border-2 border-green-600 text-green-600 py-3 px-4 rounded-lg hover:bg-green-50 transition-colors font-semibold"
+                        >
+                          Registrarse
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Navigation links */}
+                <div className="flex-1 overflow-y-auto bg-white">
+                  <div className="p-4 space-y-2">
+                    <button
+                      onClick={() => {
+                        router.push("/sobre-nosotros");
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full text-left py-3 px-4 text-gray-800 hover:bg-green-50 hover:text-green-600 transition-colors font-semibold rounded-lg"
+                    >
+                      Sobre Nosotros
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        router.push("/categorias/todos");
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full text-left py-3 px-4 text-gray-800 hover:bg-green-50 hover:text-green-600 transition-colors font-semibold rounded-lg"
+                    >
+                      Productos
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        router.push("/establecimientos");
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full text-left py-3 px-4 text-gray-800 hover:bg-green-50 hover:text-green-600 transition-colors font-semibold rounded-lg"
+                    >
+                      Establecimientos
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        router.push("/contacto");
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full text-left py-3 px-4 text-gray-800 hover:bg-green-50 hover:text-green-600 transition-colors font-semibold rounded-lg"
+                    >
+                      Contacto
+                    </button>
+                  </div>
+                </div>
+
+                {/* Footer section */}
+                <div className="p-4 bg-gray-50 border-t border-gray-200">
+                  <p className="text-sm text-gray-600 text-center font-medium">
+                    © 2024 AgroMap. Todos los derechos reservados.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-
-          <button
-            onClick={() => {
-              router.push("/establecimientos");
-              setMobileMenuOpen(false);
-            }}
-            className="block w-full text-left py-2 cursor-pointer"
-          >
-            Establecimientos
-          </button>
-
-          <button
-            onClick={() => {
-              router.push("/sobre-nosotros");
-              setMobileMenuOpen(false);
-            }}
-            className="block w-full text-left py-2 cursor-pointer"
-          >
-            Sobre Nosotros
-          </button>
-
-          <button
-            onClick={() => {
-              router.push("/contacto");
-              setMobileMenuOpen(false);
-            }}
-            className="block w-full text-left py-2 cursor-pointer"
-          >
-            Contacto
-          </button>
-        </div>
+        </>
       )}
     </nav>
   );
