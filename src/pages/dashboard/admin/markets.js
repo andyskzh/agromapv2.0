@@ -1,6 +1,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import BackToDashboard from "@/components/BackToDashboard";
 
 export default function AdminMarketsPage() {
   const { data: session, status } = useSession();
@@ -120,6 +121,7 @@ export default function AdminMarketsPage() {
 
   return (
     <div className="p-6">
+      <BackToDashboard />
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-green-800">
           Gestión de Mercados

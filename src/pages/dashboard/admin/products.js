@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import BackToDashboard from "@/components/BackToDashboard";
 
 export default function AdminProductsPage() {
   const { data: session, status } = useSession();
@@ -85,6 +86,7 @@ export default function AdminProductsPage() {
 
   return (
     <div className="p-6">
+      <BackToDashboard />
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-green-800">
           Gestión de Productos
