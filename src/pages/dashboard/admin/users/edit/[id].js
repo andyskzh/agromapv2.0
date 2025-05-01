@@ -2,6 +2,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import PasswordInput from "@/components/PasswordInput";
+import BackButton from "@/components/BackButton";
 
 export default function EditUserAdmin() {
   const { data: session, status } = useSession();
@@ -102,92 +103,99 @@ export default function EditUserAdmin() {
   if (!user) return <p className="p-6">Usuario no encontrado</p>;
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-green-800 mb-6">
-        Editar Usuario: {user.username}
-      </h1>
+    <div className="p-6">
+      <BackButton />
+      <div className="p-6 max-w-2xl mx-auto">
+        <h1 className="text-2xl font-bold text-green-800 mb-6">
+          Editar Usuario: {user.username}
+        </h1>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg">
+            {error}
+          </div>
+        )}
 
-      {success && (
-        <div className="mb-4 p-4 bg-green-50 text-green-600 rounded-lg">
-          Usuario actualizado correctamente. Redirigiendo...
-        </div>
-      )}
+        {success && (
+          <div className="mb-4 p-4 bg-green-50 text-green-600 rounded-lg">
+            Usuario actualizado correctamente. Redirigiendo...
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Nombre completo
-          </label>
-          <input
-            type="text"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block font-semibold text-green-900 mb-1">
+              Nombre completo
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+            />
+          </div>
 
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Nombre de usuario *
-          </label>
-          <input
-            type="text"
-            value={formData.username}
+          <div>
+            <label className="block font-semibold text-green-900 mb-1">
+              Nombre de usuario *
+            </label>
+            <input
+              type="text"
+              value={formData.username}
+              onChange={(e) =>
+                setFormData({ ...formData, username: e.target.value })
+              }
+              required
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+            />
+          </div>
+
+          <PasswordInput
+            value={formData.password}
             onChange={(e) =>
-              setFormData({ ...formData, username: e.target.value })
+              setFormData({ ...formData, password: e.target.value })
             }
-            required
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+            label="Contraseña (dejar en blanco para mantener la actual)"
+            required={false}
           />
-        </div>
 
-        <PasswordInput
-          value={formData.password}
-          onChange={(e) =>
-            setFormData({ ...formData, password: e.target.value })
-          }
-          label="Contraseña (dejar en blanco para mantener la actual)"
-          required={false}
-        />
+          <div>
+            <label className="block font-semibold text-green-900 mb-1">
+              Rol *
+            </label>
+            <select
+              value={formData.role}
+              onChange={(e) =>
+                setFormData({ ...formData, role: e.target.value })
+              }
+              required
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+            >
+              <option value="USER">Usuario</option>
+              <option value="MARKET_MANAGER">Gestor de Mercado</option>
+              <option value="ADMIN">Administrador</option>
+            </select>
+          </div>
 
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Rol *
-          </label>
-          <select
-            value={formData.role}
-            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-            required
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-          >
-            <option value="USER">Usuario</option>
-            <option value="MARKET_MANAGER">Gestor de Mercado</option>
-            <option value="ADMIN">Administrador</option>
-          </select>
-        </div>
-
-        <div className="flex space-x-4">
-          <button
-            type="submit"
-            className="flex-1 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors"
-          >
-            Guardar cambios
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard/admin/users")}
-            className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded hover:bg-gray-200 transition-colors"
-          >
-            Cancelar
-          </button>
-        </div>
-      </form>
+          <div className="flex space-x-4">
+            <button
+              type="submit"
+              className="flex-1 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors"
+            >
+              Guardar cambios
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/dashboard/admin/users")}
+              className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded hover:bg-gray-200 transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

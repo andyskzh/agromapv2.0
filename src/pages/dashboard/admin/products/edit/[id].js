@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import BackButton from "@/components/BackButton";
 
 export default function EditProductAdmin() {
   const router = useRouter();
@@ -193,259 +194,265 @@ export default function EditProductAdmin() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold text-green-900 mb-6 text-center">
-        Editar Producto
-      </h1>
+    <div className="p-6">
+      <BackButton />
+      <div className="max-w-3xl mx-auto p-6">
+        <h1 className="text-2xl font-bold text-green-900 mb-6 text-center">
+          Editar Producto
+        </h1>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg">
+            {error}
+          </div>
+        )}
 
-      {success && (
-        <div className="mb-4 p-4 bg-green-50 text-green-600 rounded-lg">
-          Producto actualizado exitosamente
-        </div>
-      )}
+        {success && (
+          <div className="mb-4 p-4 bg-green-50 text-green-600 rounded-lg">
+            Producto actualizado exitosamente
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Producto Base */}
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Producto Base (opcional)
-          </label>
-          <select
-            name="baseProductId"
-            value={form.baseProductId}
-            onChange={handleBaseProductChange}
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-          >
-            <option value="">Selecciona un producto base</option>
-            {baseProducts.map((bp) => (
-              <option key={bp.id} value={bp.id}>
-                {bp.name}
-              </option>
-            ))}
-          </select>
-          <p className="text-sm text-gray-500 mt-1">
-            Al seleccionar un producto base, se copiará su información
-            nutricional en la descripción.
-          </p>
-        </div>
-
-        {/* Mercado */}
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Mercado *
-          </label>
-          <select
-            name="marketId"
-            value={form.marketId}
-            onChange={handleChange}
-            required
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-          >
-            <option value="">Selecciona un mercado</option>
-            {markets.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Nombre */}
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Nombre *
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            required
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-          />
-        </div>
-
-        {/* Descripción */}
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Descripción
-          </label>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            rows={3}
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-          />
-        </div>
-
-        {/* Cantidad y Unidad */}
-        <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Producto Base */}
           <div>
             <label className="block font-semibold text-green-900 mb-1">
-              Cantidad *
+              Producto Base (opcional)
             </label>
-            <input
-              type="number"
-              name="quantity"
-              value={form.quantity}
+            <select
+              name="baseProductId"
+              value={form.baseProductId}
+              onChange={handleBaseProductChange}
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+            >
+              <option value="">Selecciona un producto base</option>
+              {baseProducts.map((bp) => (
+                <option key={bp.id} value={bp.id}>
+                  {bp.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-sm text-gray-500 mt-1">
+              Al seleccionar un producto base, se copiará su información
+              nutricional en la descripción.
+            </p>
+          </div>
+
+          {/* Mercado */}
+          <div>
+            <label className="block font-semibold text-green-900 mb-1">
+              Mercado *
+            </label>
+            <select
+              name="marketId"
+              value={form.marketId}
               onChange={handleChange}
               required
-              min="0"
-              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-            />
-          </div>
-          <div>
-            <label className="block font-semibold text-green-900 mb-1">
-              Unidad
-            </label>
-            <select
-              name="unit"
-              value={form.unit}
-              onChange={handleChange}
-              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             >
-              {UNITS.map((u) => (
-                <option key={u} value={u}>
-                  {u}
+              <option value="">Selecciona un mercado</option>
+              {markets.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
                 </option>
               ))}
             </select>
           </div>
-        </div>
 
-        {/* Precio y Tipo */}
-        <div className="grid grid-cols-2 gap-4">
+          {/* Nombre */}
           <div>
             <label className="block font-semibold text-green-900 mb-1">
-              Precio
+              Nombre *
             </label>
             <input
-              type="number"
-              name="price"
-              value={form.price}
+              type="text"
+              name="name"
+              value={form.name}
               onChange={handleChange}
-              min="0"
-              step="0.01"
+              required
               className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
             />
           </div>
+
+          {/* Descripción */}
           <div>
             <label className="block font-semibold text-green-900 mb-1">
-              Precio por
+              Descripción
             </label>
-            <select
-              name="priceType"
-              value={form.priceType}
+            <textarea
+              name="description"
+              value={form.description}
               onChange={handleChange}
+              rows={3}
               className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-            >
-              {PRICE_TYPES.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Categoría */}
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Categoría
-          </label>
-          <select
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {c.replace("_", " ")}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Disponibilidad y SAS */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              name="isAvailable"
-              checked={form.isAvailable}
-              onChange={handleChange}
-              className="mr-2 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
             />
-            <label className="font-semibold text-green-900">Disponible</label>
           </div>
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              name="sasProgram"
-              checked={form.sasProgram}
-              onChange={handleChange}
-              className="mr-2 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-            />
-            <label className="font-semibold text-green-900">Programa SAS</label>
-          </div>
-        </div>
 
-        {/* Imagen */}
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Imagen
-          </label>
-          <div className="flex items-center space-x-4">
-            {previewImage && (
-              <div className="w-24 h-24 border rounded overflow-hidden">
-                <img
-                  src={previewImage}
-                  alt="Vista previa"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-            <div className="flex-1">
+          {/* Cantidad y Unidad */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block font-semibold text-green-900 mb-1">
+                Cantidad *
+              </label>
               <input
-                type="file"
-                name="image"
+                type="number"
+                name="quantity"
+                value={form.quantity}
                 onChange={handleChange}
-                accept="image/*"
+                required
+                min="0"
                 className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
               />
-              <p className="text-sm text-gray-500 mt-1">
-                Sube una imagen para el producto o selecciona un producto base.
-              </p>
+            </div>
+            <div>
+              <label className="block font-semibold text-green-900 mb-1">
+                Unidad
+              </label>
+              <select
+                name="unit"
+                value={form.unit}
+                onChange={handleChange}
+                className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+              >
+                {UNITS.map((u) => (
+                  <option key={u} value={u}>
+                    {u}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
-        </div>
 
-        {/* Botones */}
-        <div className="flex justify-end space-x-4">
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard/admin/products")}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-          >
-            {loading ? "Guardando..." : "Guardar Cambios"}
-          </button>
-        </div>
-      </form>
+          {/* Precio y Tipo */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block font-semibold text-green-900 mb-1">
+                Precio
+              </label>
+              <input
+                type="number"
+                name="price"
+                value={form.price}
+                onChange={handleChange}
+                min="0"
+                step="0.01"
+                className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold text-green-900 mb-1">
+                Precio por
+              </label>
+              <select
+                name="priceType"
+                value={form.priceType}
+                onChange={handleChange}
+                className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+              >
+                {PRICE_TYPES.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Categoría */}
+          <div>
+            <label className="block font-semibold text-green-900 mb-1">
+              Categoría
+            </label>
+            <select
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+            >
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {c.replace("_", " ")}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Disponibilidad y SAS */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                name="isAvailable"
+                checked={form.isAvailable}
+                onChange={handleChange}
+                className="mr-2 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+              />
+              <label className="font-semibold text-green-900">Disponible</label>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                name="sasProgram"
+                checked={form.sasProgram}
+                onChange={handleChange}
+                className="mr-2 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+              />
+              <label className="font-semibold text-green-900">
+                Programa SAS
+              </label>
+            </div>
+          </div>
+
+          {/* Imagen */}
+          <div>
+            <label className="block font-semibold text-green-900 mb-1">
+              Imagen
+            </label>
+            <div className="flex items-center space-x-4">
+              {previewImage && (
+                <div className="w-24 h-24 border rounded overflow-hidden">
+                  <img
+                    src={previewImage}
+                    alt="Vista previa"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <div className="flex-1">
+                <input
+                  type="file"
+                  name="image"
+                  onChange={handleChange}
+                  accept="image/*"
+                  className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Sube una imagen para el producto o selecciona un producto
+                  base.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Botones */}
+          <div className="flex justify-end space-x-4">
+            <button
+              type="button"
+              onClick={() => router.push("/dashboard/admin/products")}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+            >
+              {loading ? "Guardando..." : "Guardar Cambios"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

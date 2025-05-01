@@ -1,6 +1,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import BackButton from "@/components/BackButton";
 
 export default function EditMarketAdmin() {
   const { data: session, status } = useSession();
@@ -100,96 +101,101 @@ export default function EditMarketAdmin() {
   if (!market) return <p className="p-6">Mercado no encontrado</p>;
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-green-800 mb-6">
-        Editar Mercado: {market.name}
-      </h1>
+    <div className="p-6">
+      <BackButton />
+      <div className="p-6 max-w-2xl mx-auto">
+        <h1 className="text-2xl font-bold text-green-800 mb-6">
+          Editar Mercado: {market.name}
+        </h1>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg">
+            {error}
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Nombre del mercado *
-          </label>
-          <input
-            type="text"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block font-semibold text-green-900 mb-1">
+              Nombre del mercado *
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              required
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+            />
+          </div>
 
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Ubicación *
-          </label>
-          <input
-            type="text"
-            value={formData.location}
-            onChange={(e) =>
-              setFormData({ ...formData, location: e.target.value })
-            }
-            required
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-          />
-        </div>
+          <div>
+            <label className="block font-semibold text-green-900 mb-1">
+              Ubicación *
+            </label>
+            <input
+              type="text"
+              value={formData.location}
+              onChange={(e) =>
+                setFormData({ ...formData, location: e.target.value })
+              }
+              required
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+            />
+          </div>
 
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Descripción
-          </label>
-          <textarea
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            rows={3}
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-          />
-        </div>
+          <div>
+            <label className="block font-semibold text-green-900 mb-1">
+              Descripción
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              rows={3}
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+            />
+          </div>
 
-        <div>
-          <label className="block font-semibold text-green-900 mb-1">
-            Gestor del mercado
-          </label>
-          <select
-            value={formData.managerId}
-            onChange={(e) =>
-              setFormData({ ...formData, managerId: e.target.value })
-            }
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-          >
-            <option value="">Sin gestor asignado</option>
-            {managers.map((manager) => (
-              <option key={manager.id} value={manager.id}>
-                {manager.name || manager.username}
-              </option>
-            ))}
-          </select>
-        </div>
+          <div>
+            <label className="block font-semibold text-green-900 mb-1">
+              Gestor del mercado
+            </label>
+            <select
+              value={formData.managerId}
+              onChange={(e) =>
+                setFormData({ ...formData, managerId: e.target.value })
+              }
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+            >
+              <option value="">Sin gestor asignado</option>
+              {managers.map((manager) => (
+                <option key={manager.id} value={manager.id}>
+                  {manager.name || manager.username}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="flex space-x-4">
-          <button
-            type="submit"
-            className="flex-1 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors"
-          >
-            Guardar cambios
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard/admin/markets")}
-            className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded hover:bg-gray-200 transition-colors"
-          >
-            Cancelar
-          </button>
-        </div>
-      </form>
+          <div className="flex space-x-4">
+            <button
+              type="submit"
+              className="flex-1 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors"
+            >
+              Guardar cambios
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/dashboard/admin/markets")}
+              className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded hover:bg-gray-200 transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
