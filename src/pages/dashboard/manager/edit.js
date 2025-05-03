@@ -1,270 +1,272 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
+import { useEffect, useState } from "react";
+import { FaEdit, FaSave, FaTimes, FaMapMarkerAlt } from "react-icons/fa";
+import dynamic from "next/dynamic";
 import BackButton from "@/components/BackButton";
+
+// Importar el mapa dinámicamente para evitar problemas con SSR
+const Map = dynamic(() => import("@/components/Map"), {
+  ssr: false,
+});
 
 export default function EditMarket() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [market, setMarket] = useState(null);
-  const [previewImage, setPreviewImage] = useState(null);
-  const fileInputRef = useRef(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    location: "",
+    description: "",
+    latitude: "",
+    longitude: "",
+    image: null,
+  });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/signin");
-    } else if (
-      status === "authenticated" &&
-      session.user.role !== "MARKET_MANAGER"
-    ) {
+    if (status === "loading") return;
+    if (!session || session.user.role !== "MARKET_MANAGER") {
       router.push("/dashboard");
+      return;
     }
+
+    fetchMarket();
   }, [session, status, router]);
 
-  useEffect(() => {
-    const fetchMarket = async () => {
-      try {
-        const response = await fetch("/api/market/my");
-        const data = await response.json();
-        if (data.market) {
-          setMarket(data.market);
-          setPreviewImage(data.market.image);
-        }
-      } catch (error) {
-        console.error("Error al cargar el mercado:", error);
-        setError("Error al cargar los datos del mercado");
-      }
-    };
-
-    if (session?.user?.role === "MARKET_MANAGER") {
-      fetchMarket();
-    }
-  }, [session]);
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    const formData = new FormData();
-    formData.append("name", e.target.name.value);
-    formData.append("location", e.target.location.value);
-    formData.append("description", e.target.description.value);
-    formData.append("latitude", e.target.latitude.value);
-    formData.append("longitude", e.target.longitude.value);
-
-    if (fileInputRef.current.files[0]) {
-      formData.append("image", fileInputRef.current.files[0]);
-    }
-
+  const fetchMarket = async () => {
     try {
-      const response = await fetch("/api/market/edit", {
-        method: "PUT",
-        body: formData,
+      const res = await fetch("/api/market/my");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Error al cargar el mercado");
+      }
+
+      setMarket(data.market);
+      setFormData({
+        name: data.market.name || "",
+        location: data.market.location || "",
+        description: data.market.description || "",
+        latitude: data.market.latitude?.toString() || "",
+        longitude: data.market.longitude?.toString() || "",
+        image: data.market.image || null,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Error al actualizar el mercado");
+      if (data.market.latitude && data.market.longitude) {
+        setSelectedLocation({
+          lat: data.market.latitude,
+          lng: data.market.longitude,
+        });
       }
-
-      router.push("/dashboard/manager");
-    } catch (error) {
-      setError(error.message);
+    } catch (err) {
+      console.error(err);
+      setError("Error al cargar el mercado");
     } finally {
       setLoading(false);
     }
   };
 
-  if (status === "loading" || !market) {
-    return (
-      <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Cargando...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleLocationSelect = (lat, lng) => {
+    setSelectedLocation({ lat, lng });
+    setFormData({
+      ...formData,
+      latitude: lat.toString(),
+      longitude: lng.toString(),
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("location", formData.location);
+      formDataToSend.append("description", formData.description);
+      if (formData.latitude)
+        formDataToSend.append("latitude", formData.latitude);
+      if (formData.longitude)
+        formDataToSend.append("longitude", formData.longitude);
+      if (formData.image) formDataToSend.append("image", formData.image);
+
+      const res = await fetch("/api/market/edit", {
+        method: "PUT",
+        body: formDataToSend,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Error al actualizar el mercado");
+      }
+
+      setSuccess("Mercado actualizado correctamente");
+      setTimeout(() => {
+        router.push("/dashboard/manager");
+      }, 1500);
+    } catch (err) {
+      console.error(err);
+      setError("Error al actualizar el mercado");
+    }
+  };
+
+  if (loading) return <p className="p-6">Cargando...</p>;
+  if (!market) return <p className="p-6">Mercado no encontrado</p>;
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="p-6">
-          <BackButton />
-          <div className="bg-white shadow rounded-lg p-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">
-              Editar Mercado
-            </h1>
+      <div className="max-w-4xl mx-auto">
+        <BackButton />
+        <div className="bg-white shadow rounded-lg p-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">
+            Editar Mercado
+          </h1>
 
-            {error && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-red-600">{error}</p>
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-4 p-4 bg-green-50 text-green-600 rounded-lg">
+              {success}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block font-semibold text-green-900 mb-1">
+                Nombre del mercado:
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded p-2 text-gray-800"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold text-green-900 mb-1">
+                Ubicación:
+              </label>
+              <input
+                type="text"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded p-2 text-gray-800"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold text-green-900 mb-1">
+                Descripción:
+              </label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded p-2 text-gray-800"
+                rows="3"
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold text-green-900 mb-1">
+                Seleccionar ubicación en el mapa:
+              </label>
+              <div className="h-64 w-full rounded-lg overflow-hidden border border-gray-300">
+                <Map
+                  selectedLocation={selectedLocation}
+                  onLocationSelect={handleLocationSelect}
+                />
               </div>
-            )}
+              <p className="text-sm text-gray-500 mt-1">
+                Haz clic en el mapa para marcar la ubicación exacta de tu
+                mercado
+              </p>
+            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Imagen del Mercado
-                </label>
-                <div className="mt-2 flex items-center space-x-4">
-                  <div className="relative h-32 w-32 rounded-lg overflow-hidden">
-                    {previewImage ? (
-                      <Image
-                        src={previewImage}
-                        alt="Preview"
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="h-full w-full bg-gray-200 flex items-center justify-center">
-                        <span className="text-gray-400">Sin imagen</span>
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleImageChange}
-                      accept="image/*"
-                      className="hidden"
-                      id="image-upload"
-                    />
-                    <label
-                      htmlFor="image-upload"
-                      className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                    >
-                      Cambiar imagen
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Nombre del Mercado
+                <label className="block font-semibold text-green-900 mb-1">
+                  Latitud:
                 </label>
                 <input
                   type="text"
-                  name="name"
-                  id="name"
-                  defaultValue={market.name}
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
+                  name="latitude"
+                  value={formData.latitude}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded p-2 text-gray-800"
+                  placeholder="Opcional"
                 />
               </div>
-
               <div>
-                <label
-                  htmlFor="location"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Ubicación
+                <label className="block font-semibold text-green-900 mb-1">
+                  Longitud:
                 </label>
                 <input
                   type="text"
-                  name="location"
-                  id="location"
-                  defaultValue={market.location}
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
+                  name="longitude"
+                  value={formData.longitude}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded p-2 text-gray-800"
+                  placeholder="Opcional"
                 />
               </div>
+            </div>
 
-              {/* Coordenadas */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="latitude"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Latitud
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    name="latitude"
-                    id="latitude"
-                    defaultValue={market.latitude}
-                    required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="longitude"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Longitud
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    name="longitude"
-                    id="longitude"
-                    defaultValue={market.longitude}
-                    required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
-                  />
-                </div>
-              </div>
+            <div>
+              <label className="block font-semibold text-green-900 mb-1">
+                Imagen del mercado:
+              </label>
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                onChange={(e) => {
+                  if (e.target.files[0]) {
+                    setFormData({ ...formData, image: e.target.files[0] });
+                  }
+                }}
+                className="w-full border border-gray-300 rounded p-2 text-gray-800"
+              />
+            </div>
 
-              <div>
-                <label
-                  htmlFor="description"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Descripción
-                </label>
-                <textarea
-                  name="description"
-                  id="description"
-                  rows={4}
-                  defaultValue={market.description || ""}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-gray-800"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-4">
-                <button
-                  type="button"
-                  onClick={() => router.push("/dashboard/manager")}
-                  className="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-                >
-                  {loading ? "Guardando..." : "Guardar Cambios"}
-                </button>
-              </div>
-            </form>
-          </div>
+            <div className="flex space-x-4">
+              <button
+                type="submit"
+                className="flex-1 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors flex items-center justify-center"
+              >
+                <FaSave className="mr-2" />
+                Guardar cambios
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/manager")}
+                className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded hover:bg-gray-200 transition-colors flex items-center justify-center"
+              >
+                <FaTimes className="mr-2" />
+                Cancelar
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

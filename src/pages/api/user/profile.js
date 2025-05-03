@@ -65,7 +65,7 @@ export default async function handler(req, res) {
 
       if (name) updateData.name = name;
       if (username) updateData.username = username;
-      if (image) updateData.image = image;
+      if (image !== undefined) updateData.image = image || null; // Permitir establecer null explícitamente
 
       // Solo actualizar la contraseña si se proporciona una nueva
       if (password) {

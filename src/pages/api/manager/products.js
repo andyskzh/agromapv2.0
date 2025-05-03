@@ -38,10 +38,48 @@ export default async function handler(req, res) {
               category: true,
             },
           },
+          comments: {
+            select: {
+              rating: true,
+            },
+          },
         },
       });
 
-      return res.status(200).json({ products });
+      // Obtener todas las categorías disponibles
+      const categories = await prisma.productBase.findMany({
+        select: {
+          category: true,
+        },
+        distinct: ["category"],
+      });
+
+      // Calcular el promedio de valoraciones para cada producto
+      const productsWithRatings = products.map((product) => {
+        const totalRating = product.comments.reduce(
+          (acc, comment) => acc + comment.rating,
+          0
+        );
+        const averageRating =
+          product.comments.length > 0
+            ? totalRating / product.comments.length
+            : 0;
+
+        return {
+          ...product,
+          category: product.baseProduct?.category || product.category || "OTRO",
+          averageRating: averageRating,
+          totalComments: product.comments.length,
+          comments: product.comments, // Mantener los comentarios para debug
+        };
+      });
+
+      console.log("Productos con valoraciones:", productsWithRatings); // Debug
+
+      return res.status(200).json({
+        products: productsWithRatings,
+        categories: categories.map((c) => c.category),
+      });
     } catch (error) {
       console.error("Error al obtener productos:", error);
       return res.status(500).json({ message: "Error al obtener productos" });

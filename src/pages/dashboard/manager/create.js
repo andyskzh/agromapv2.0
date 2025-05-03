@@ -2,6 +2,12 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
+
+// Importar el mapa dinámicamente para evitar problemas con SSR
+const Map = dynamic(() => import("@/components/Map"), {
+  ssr: false,
+});
 
 export default function CreateMarket() {
   const { data: session, status } = useSession();
@@ -14,6 +20,7 @@ export default function CreateMarket() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -33,6 +40,12 @@ export default function CreateMarket() {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleLocationSelect = (lat, lng) => {
+    setSelectedLocation({ lat, lng });
+    setLatitude(lat.toString());
+    setLongitude(lng.toString());
   };
 
   const handleSubmit = async (e) => {
@@ -77,7 +90,7 @@ export default function CreateMarket() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-8">
-      <div className="max-w-2xl mx-auto px-4">
+      <div className="max-w-4xl mx-auto px-4">
         <div className="bg-white rounded-xl shadow-md p-8">
           <h1 className="text-3xl font-bold text-green-800 mb-6">
             Crear nuevo mercado
@@ -177,11 +190,28 @@ export default function CreateMarket() {
               />
             </div>
 
+            {/* Mapa */}
+            <div>
+              <label className="block font-semibold text-gray-700 mb-2">
+                Seleccionar ubicación en el mapa
+              </label>
+              <div className="h-64 w-full rounded-lg overflow-hidden border border-gray-300">
+                <Map
+                  selectedLocation={selectedLocation}
+                  onLocationSelect={handleLocationSelect}
+                />
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                Haz clic en el mapa para marcar la ubicación exacta de tu
+                mercado
+              </p>
+            </div>
+
             {/* Coordenadas */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block font-semibold text-gray-700 mb-2">
-                  Latitud *
+                  Latitud
                 </label>
                 <input
                   type="number"
@@ -189,13 +219,12 @@ export default function CreateMarket() {
                   className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   value={latitude}
                   onChange={(e) => setLatitude(e.target.value)}
-                  required
                   placeholder="Ej: 19.4517"
                 />
               </div>
               <div>
                 <label className="block font-semibold text-gray-700 mb-2">
-                  Longitud *
+                  Longitud
                 </label>
                 <input
                   type="number"
@@ -203,7 +232,6 @@ export default function CreateMarket() {
                   className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   value={longitude}
                   onChange={(e) => setLongitude(e.target.value)}
-                  required
                   placeholder="Ej: -70.6970"
                 />
               </div>

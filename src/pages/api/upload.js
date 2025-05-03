@@ -61,7 +61,7 @@ export default async function handler(req, res) {
     const uploadPromise = new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          folder: "agromap/uploads",
+          folder: "agromap/profiles",
           resource_type: "auto",
         },
         (error, result) => {

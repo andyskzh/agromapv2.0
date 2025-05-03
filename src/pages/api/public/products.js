@@ -10,6 +10,9 @@ export default async function handler(req, res) {
   try {
     // Obtener todos los productos con sus mercados
     const products = await prisma.product.findMany({
+      where: {
+        isAvailable: true, // Solo productos disponibles
+      },
       orderBy: { updatedAt: "desc" },
       include: {
         market: {

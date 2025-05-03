@@ -95,11 +95,14 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "DELETE") {
-      // Obtener el producto para verificar permisos
+      // Verificar si el producto existe y pertenece al mercado del gestor
       const product = await prisma.product.findFirst({
         where: {
-          id,
+          id: id,
           marketId: market.id,
+        },
+        include: {
+          comments: true,
         },
       });
 
@@ -107,14 +110,33 @@ export default async function handler(req, res) {
         return res.status(404).json({ message: "Producto no encontrado" });
       }
 
-      // Eliminar el producto
-      await prisma.product.delete({
-        where: { id },
-      });
+      try {
+        // Primero eliminar los comentarios asociados
+        if (product.comments.length > 0) {
+          await prisma.comment.deleteMany({
+            where: {
+              productId: id,
+            },
+          });
+        }
 
-      return res
-        .status(200)
-        .json({ message: "Producto eliminado correctamente" });
+        // Luego eliminar el producto
+        await prisma.product.delete({
+          where: {
+            id: id,
+          },
+        });
+
+        return res
+          .status(200)
+          .json({ message: "Producto eliminado correctamente" });
+      } catch (error) {
+        console.error("Error al eliminar el producto:", error);
+        return res.status(500).json({
+          message: "Error al eliminar el producto",
+          error: error.message,
+        });
+      }
     }
 
     return res.status(405).json({ message: "Método no permitido" });
