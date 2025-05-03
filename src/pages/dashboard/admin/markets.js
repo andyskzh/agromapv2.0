@@ -1,7 +1,15 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import BackToDashboard from "@/components/BackToDashboard";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import Link from "next/link";
+
+// Importar el mapa dinámicamente para evitar problemas con SSR
+const Map = dynamic(() => import("@/components/Map"), {
+  ssr: false,
+});
 
 export default function AdminMarketsPage() {
   const { data: session, status } = useSession();
@@ -17,8 +25,13 @@ export default function AdminMarketsPage() {
     managerId: "",
     latitude: "",
     longitude: "",
+    image: null,
   });
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
   const [managers, setManagers] = useState([]);
+  const [availableManagers, setAvailableManagers] = useState([]);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -31,6 +44,15 @@ export default function AdminMarketsPage() {
     fetchMarkets();
     fetchManagers();
   }, []);
+
+  useEffect(() => {
+    // Filtrar gestores disponibles (sin mercado asignado)
+    const assignedManagerIds = markets.map((market) => market.managerId);
+    const available = managers.filter(
+      (manager) => !assignedManagerIds.includes(manager.id)
+    );
+    setAvailableManagers(available);
+  }, [markets, managers]);
 
   const fetchMarkets = async () => {
     try {
@@ -64,6 +86,26 @@ export default function AdminMarketsPage() {
     }
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleLocationSelect = (lat, lng) => {
+    setSelectedLocation({ lat, lng });
+    setFormData({
+      ...formData,
+      latitude: lat.toString(),
+      longitude: lng.toString(),
+    });
+  };
+
   const handleDelete = async (id) => {
     if (!confirm("¿Estás seguro de que deseas eliminar este mercado?")) return;
 
@@ -88,11 +130,43 @@ export default function AdminMarketsPage() {
     e.preventDefault();
     setError("");
 
+    // Validar campos requeridos
+    if (
+      !formData.name ||
+      !formData.location ||
+      !formData.latitude ||
+      !formData.longitude
+    ) {
+      setError("Por favor, complete todos los campos requeridos (*)");
+      return;
+    }
+
     try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("location", formData.location);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("latitude", formData.latitude);
+      formDataToSend.append("longitude", formData.longitude);
+      if (formData.managerId) {
+        formDataToSend.append("managerId", formData.managerId);
+      }
+      if (fileInputRef.current?.files[0]) {
+        formDataToSend.append("image", fileInputRef.current.files[0]);
+      }
+
+      console.log("Enviando datos:", {
+        name: formData.name,
+        location: formData.location,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        managerId: formData.managerId,
+        hasImage: !!fileInputRef.current?.files[0],
+      });
+
       const res = await fetch("/api/admin/markets", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: formDataToSend,
       });
 
       const data = await res.json();
@@ -106,13 +180,16 @@ export default function AdminMarketsPage() {
           managerId: "",
           latitude: "",
           longitude: "",
+          image: null,
         });
+        setPreviewImage(null);
+        setSelectedLocation(null);
         fetchMarkets();
       } else {
         setError(data.message || "Error al crear el mercado");
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error al crear mercado:", err);
       setError("Error al crear el mercado");
     }
   };
@@ -120,199 +197,265 @@ export default function AdminMarketsPage() {
   if (loading) return <p className="p-6">Cargando...</p>;
 
   return (
-    <div className="p-6">
-      <BackToDashboard />
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-green-800">
-          Gestión de Mercados
-        </h1>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
-        >
-          {showForm ? "Cancelar" : "+ Nuevo Mercado"}
-        </button>
-      </div>
-
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg">
-          {error}
-        </div>
-      )}
-
-      {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          className="mb-8 p-6 bg-white rounded-lg shadow-md space-y-4"
-        >
-          <div>
-            <label className="block font-semibold text-green-900 mb-1">
-              Nombre del mercado *
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              required
-              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-            />
-          </div>
-
-          <div>
-            <label className="block font-semibold text-green-900 mb-1">
-              Ubicación *
-            </label>
-            <input
-              type="text"
-              value={formData.location}
-              onChange={(e) =>
-                setFormData({ ...formData, location: e.target.value })
-              }
-              required
-              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-            />
-          </div>
-
-          {/* Coordenadas */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block font-semibold text-green-900 mb-1">
-                Latitud *
-              </label>
-              <input
-                type="number"
-                step="any"
-                value={formData.latitude}
-                onChange={(e) =>
-                  setFormData({ ...formData, latitude: e.target.value })
-                }
-                required
-                className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-                placeholder="Ej: 19.4517"
-              />
-            </div>
-            <div>
-              <label className="block font-semibold text-green-900 mb-1">
-                Longitud *
-              </label>
-              <input
-                type="number"
-                step="any"
-                value={formData.longitude}
-                onChange={(e) =>
-                  setFormData({ ...formData, longitude: e.target.value })
-                }
-                required
-                className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-                placeholder="Ej: -70.6970"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block font-semibold text-green-900 mb-1">
-              Descripción
-            </label>
-            <textarea
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              rows={3}
-              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-            />
-          </div>
-
-          <div>
-            <label className="block font-semibold text-green-900 mb-1">
-              Gestor del mercado
-            </label>
-            <select
-              value={formData.managerId}
-              onChange={(e) =>
-                setFormData({ ...formData, managerId: e.target.value })
-              }
-              className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
-            >
-              <option value="">Sin gestor asignado</option>
-              {managers.map((manager) => (
-                <option key={manager.id} value={manager.id}>
-                  {manager.name || manager.username}
-                </option>
-              ))}
-            </select>
-          </div>
-
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-8">
+      <div className="max-w-7xl mx-auto px-4">
+        <BackToDashboard />
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-green-800">Mercados</h1>
           <button
-            type="submit"
-            className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors"
+            onClick={() => setShowForm(!showForm)}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
           >
-            Crear Mercado
+            {showForm ? "Cancelar" : "Crear nuevo mercado"}
           </button>
-        </form>
-      )}
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {markets.map((market) => (
-          <div
-            key={market.id}
-            className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="text-xl font-semibold text-green-800">
-                {market.name}
-              </h3>
-              <div className="flex space-x-2">
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
+
+        {showForm && (
+          <div className="fixed inset-0 bg-white/80 backdrop-blur-md flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-green-800">
+                  Crear nuevo mercado
+                </h2>
                 <button
-                  onClick={() =>
-                    router.push(`/dashboard/admin/markets/edit/${market.id}`)
-                  }
-                  className="text-blue-600 hover:text-blue-800"
+                  onClick={() => setShowForm(false)}
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  Editar
-                </button>
-                <button
-                  onClick={() => handleDelete(market.id)}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  Eliminar
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
                 </button>
               </div>
-            </div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Nombre del mercado <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Ubicación <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.location}
+                      onChange={(e) =>
+                        setFormData({ ...formData, location: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      required
+                    />
+                  </div>
+                </div>
 
-            <div className="space-y-2">
-              <p className="text-gray-600">
-                <span className="font-medium">Ubicación:</span>{" "}
-                {market.location}
-              </p>
-              {market.description && (
-                <p className="text-gray-600">
-                  <span className="font-medium">Descripción:</span>{" "}
-                  {market.description}
-                </p>
-              )}
-              <p className="text-gray-600">
-                <span className="font-medium">Gestor:</span>{" "}
-                {market.manager
-                  ? market.manager.name || market.manager.username
-                  : "Sin asignar"}
-              </p>
-              <p className="text-gray-600">
-                <span className="font-medium">Productos:</span>{" "}
-                {market.products?.length || 0}
-              </p>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Descripción
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Gestor del mercado
+                  </label>
+                  <select
+                    value={formData.managerId}
+                    onChange={(e) =>
+                      setFormData({ ...formData, managerId: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    <option value="">Seleccionar gestor</option>
+                    {availableManagers.map((manager) => (
+                      <option key={manager.id} value={manager.id}>
+                        {manager.name} ({manager.username})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Imagen del mercado
+                  </label>
+                  <div className="flex items-center space-x-4">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleImageChange}
+                      accept="image/*"
+                      className="hidden"
+                      id="market-image"
+                    />
+                    <label
+                      htmlFor="market-image"
+                      className="cursor-pointer bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-md text-gray-700"
+                    >
+                      Seleccionar imagen
+                    </label>
+                    {previewImage && (
+                      <div className="relative w-20 h-20">
+                        <Image
+                          src={previewImage}
+                          alt="Preview"
+                          fill
+                          className="object-cover rounded-md"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Coordenadas <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">
+                        Latitud
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={formData.latitude}
+                        onChange={(e) =>
+                          setFormData({ ...formData, latitude: e.target.value })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">
+                        Longitud
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={formData.longitude}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            longitude: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="h-64 rounded-lg overflow-hidden border border-gray-300">
+                  <Map
+                    center={[4.6097, -74.0817]}
+                    zoom={6}
+                    onLocationSelect={handleLocationSelect}
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowForm(false)}
+                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700"
+                  >
+                    Crear mercado
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-        ))}
-      </div>
+        )}
 
-      {markets.length === 0 && !loading && (
-        <p className="text-center text-gray-600 mt-8">
-          No hay mercados registrados.
-        </p>
-      )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {markets.map((market) => (
+            <div
+              key={market.id}
+              className="bg-white rounded-xl shadow-md overflow-hidden"
+            >
+              <div className="relative h-48">
+                {market.image ? (
+                  <Image
+                    src={market.image}
+                    alt={market.name}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
+                    <span className="text-gray-400">Sin imagen</span>
+                  </div>
+                )}
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {market.name}
+                </h3>
+                <p className="text-gray-600 mb-4">{market.location}</p>
+                <p className="text-gray-500 text-sm mb-4">
+                  {market.description || "Sin descripción"}
+                </p>
+                <div className="flex justify-between items-center">
+                  <Link
+                    href={`/dashboard/admin/markets/edit/${market.id}`}
+                    className="text-green-600 hover:text-green-700"
+                  >
+                    Editar
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(market.id)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

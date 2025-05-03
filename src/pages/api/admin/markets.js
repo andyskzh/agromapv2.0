@@ -1,8 +1,23 @@
 import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]";
+import formidable from "formidable";
+import { v2 as cloudinary } from "cloudinary";
 
 const prisma = new PrismaClient();
+
+// Configurar Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 export default async function handler(req, res) {
   const session = await getServerSession(req, res, authOptions);
@@ -38,49 +53,78 @@ export default async function handler(req, res) {
     }
   } else if (req.method === "POST") {
     try {
-      const { name, location, description, managerId, latitude, longitude } =
-        req.body;
-
-      if (!name || !location || !latitude || !longitude) {
-        return res.status(400).json({
-          message: "El nombre, ubicación y coordenadas son campos requeridos",
-        });
-      }
-
-      // Si se proporciona un managerId, verificar que el usuario existe y es un MARKET_MANAGER
-      if (managerId) {
-        const manager = await prisma.user.findUnique({
-          where: { id: managerId },
-        });
-
-        if (!manager || manager.role !== "MARKET_MANAGER") {
-          return res.status(400).json({
-            message: "El gestor seleccionado no es válido",
-          });
-        }
-      }
-
-      const market = await prisma.market.create({
-        data: {
-          name,
-          location,
-          description,
-          latitude: parseFloat(latitude),
-          longitude: parseFloat(longitude),
-          managerId: managerId || null,
-        },
-        include: {
-          manager: {
-            select: {
-              id: true,
-              name: true,
-              username: true,
-            },
-          },
-        },
+      // Configurar formidable
+      const form = formidable({
+        keepExtensions: true,
+        maxFileSize: 5 * 1024 * 1024, // 5MB
       });
 
-      res.status(201).json({ market });
+      // Parsear el formulario
+      form.parse(req, async (err, fields, files) => {
+        if (err) {
+          console.error("Error al parsear el formulario:", err);
+          return res.status(500).json({
+            message: "Error al procesar el formulario",
+            details: err.message,
+          });
+        }
+
+        const { name, location, description, managerId, latitude, longitude } =
+          fields;
+
+        if (!name || !location || !latitude || !longitude) {
+          return res.status(400).json({
+            message: "El nombre, ubicación y coordenadas son campos requeridos",
+          });
+        }
+
+        // Si se proporciona un managerId, verificar que el usuario existe y es un MARKET_MANAGER
+        if (managerId && managerId.length > 0) {
+          const manager = await prisma.user.findUnique({
+            where: { id: managerId[0] }, // Tomar el primer elemento del array
+          });
+
+          if (!manager || manager.role !== "MARKET_MANAGER") {
+            return res.status(400).json({
+              message: "El gestor seleccionado no es válido",
+            });
+          }
+        }
+
+        let imageUrl = null;
+        const imageFile = files.image?.[0];
+
+        // Si hay una imagen, subirla a Cloudinary
+        if (imageFile) {
+          const result = await cloudinary.uploader.upload(imageFile.filepath, {
+            folder: "agromap/mercados",
+          });
+          imageUrl = result.secure_url;
+        }
+
+        const market = await prisma.market.create({
+          data: {
+            name: name.toString(),
+            location: location.toString(),
+            description: description?.toString(),
+            latitude: parseFloat(latitude.toString()),
+            longitude: parseFloat(longitude.toString()),
+            managerId: managerId && managerId.length > 0 ? managerId[0] : null,
+            image: imageUrl,
+          },
+          include: {
+            manager: {
+              select: {
+                id: true,
+                name: true,
+                username: true,
+              },
+            },
+          },
+        });
+
+        res.status(201).json({ market });
+      });
     } catch (error) {
       console.error("Error al crear mercado:", error);
       res.status(500).json({ message: "Error al crear mercado" });
