@@ -24,6 +24,7 @@ export default function EditMarketAdmin() {
     latitude: "",
     longitude: "",
     image: null,
+    legalBeneficiary: "",
   });
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
@@ -65,6 +66,7 @@ export default function EditMarketAdmin() {
         latitude: data.market.latitude?.toString() || "",
         longitude: data.market.longitude?.toString() || "",
         image: data.market.image || null,
+        legalBeneficiary: data.market.legalBeneficiary || "",
       });
       setPreviewImage(data.market.image || null);
       if (data.market.latitude && data.market.longitude) {
@@ -138,6 +140,7 @@ export default function EditMarketAdmin() {
       formDataToSend.append("description", formData.description);
       formDataToSend.append("latitude", formData.latitude);
       formDataToSend.append("longitude", formData.longitude);
+      formDataToSend.append("legalBeneficiary", formData.legalBeneficiary);
       if (formData.managerId) {
         formDataToSend.append("managerId", formData.managerId);
       }
@@ -236,6 +239,20 @@ export default function EditMarketAdmin() {
                   required
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Beneficiario Legal
+              </label>
+              <input
+                type="text"
+                value={formData.legalBeneficiary}
+                onChange={(e) =>
+                  setFormData({ ...formData, legalBeneficiary: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
             </div>
 
             <div>

@@ -1,9 +1,10 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { FaEdit, FaSave, FaTimes, FaMapMarkerAlt } from "react-icons/fa";
 import dynamic from "next/dynamic";
 import BackButton from "@/components/BackButton";
+import Image from "next/image";
 
 // Importar el mapa dinámicamente para evitar problemas con SSR
 const Map = dynamic(() => import("@/components/Map"), {
@@ -21,11 +22,14 @@ export default function EditMarket() {
     latitude: "",
     longitude: "",
     image: null,
+    legalBeneficiary: "",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -46,16 +50,16 @@ export default function EditMarket() {
         throw new Error(data.message || "Error al cargar el mercado");
       }
 
-      setMarket(data.market);
       setFormData({
-        name: data.market.name || "",
-        location: data.market.location || "",
+        name: data.market.name,
+        location: data.market.location,
         description: data.market.description || "",
         latitude: data.market.latitude?.toString() || "",
         longitude: data.market.longitude?.toString() || "",
         image: data.market.image || null,
+        legalBeneficiary: data.market.legalBeneficiary || "",
       });
-
+      setPreviewImage(data.market.image || null);
       if (data.market.latitude && data.market.longitude) {
         setSelectedLocation({
           lat: data.market.latitude,
@@ -63,8 +67,8 @@ export default function EditMarket() {
         });
       }
     } catch (err) {
-      console.error(err);
-      setError("Error al cargar el mercado");
+      console.error("Error al cargar mercado:", err);
+      setError(err.message || "Error al cargar el mercado");
     } finally {
       setLoading(false);
     }
@@ -84,21 +88,38 @@ export default function EditMarket() {
     });
   };
 
+  const handleImageChange = (e) => {
+    if (e.target.files[0]) {
+      setFormData({ ...formData, image: e.target.files[0] });
+      setPreviewImage(URL.createObjectURL(e.target.files[0]));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
+
+    if (
+      !formData.name ||
+      !formData.location ||
+      !formData.latitude ||
+      !formData.longitude
+    ) {
+      setError("Por favor, complete todos los campos requeridos (*)");
+      return;
+    }
 
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("name", formData.name);
       formDataToSend.append("location", formData.location);
       formDataToSend.append("description", formData.description);
-      if (formData.latitude)
-        formDataToSend.append("latitude", formData.latitude);
-      if (formData.longitude)
-        formDataToSend.append("longitude", formData.longitude);
-      if (formData.image) formDataToSend.append("image", formData.image);
+      formDataToSend.append("latitude", formData.latitude);
+      formDataToSend.append("longitude", formData.longitude);
+      formDataToSend.append("legalBeneficiary", formData.legalBeneficiary);
+      if (fileInputRef.current?.files[0]) {
+        formDataToSend.append("image", fileInputRef.current.files[0]);
+      }
 
       const res = await fetch("/api/market/edit", {
         method: "PUT",
@@ -111,18 +132,16 @@ export default function EditMarket() {
         throw new Error(data.message || "Error al actualizar el mercado");
       }
 
-      setSuccess("Mercado actualizado correctamente");
-      setTimeout(() => {
-        router.push("/dashboard/manager");
-      }, 1500);
+      alert("Mercado actualizado correctamente");
+      router.push("/dashboard/manager");
     } catch (err) {
-      console.error(err);
-      setError("Error al actualizar el mercado");
+      console.error("Error al actualizar mercado:", err);
+      setError(err.message || "Error al procesar la solicitud");
     }
   };
 
   if (loading) return <p className="p-6">Cargando...</p>;
-  if (!market) return <p className="p-6">Mercado no encontrado</p>;
+  if (!formData.name) return <p className="p-6">Cargando mercado...</p>;
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -145,108 +164,179 @@ export default function EditMarket() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Información básica */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nombre del mercado <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Ubicación <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) =>
+                    setFormData({ ...formData, location: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Beneficiario Legal */}
             <div>
-              <label className="block font-semibold text-green-900 mb-1">
-                Nombre del mercado:
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Beneficiario Legal
               </label>
               <input
                 type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded p-2 text-gray-800"
-                required
+                value={formData.legalBeneficiary}
+                onChange={(e) =>
+                  setFormData({ ...formData, legalBeneficiary: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="Nombre del beneficiario legal"
               />
             </div>
 
+            {/* Descripción */}
             <div>
-              <label className="block font-semibold text-green-900 mb-1">
-                Ubicación:
-              </label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded p-2 text-gray-800"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold text-green-900 mb-1">
-                Descripción:
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Descripción
               </label>
               <textarea
-                name="description"
                 value={formData.description}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded p-2 text-gray-800"
-                rows="3"
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                rows={3}
+                placeholder="Describe tu mercado"
               />
             </div>
 
-            <div>
-              <label className="block font-semibold text-green-900 mb-1">
-                Seleccionar ubicación en el mapa:
-              </label>
-              <div className="h-64 w-full rounded-lg overflow-hidden border border-gray-300">
-                <Map
-                  selectedLocation={selectedLocation}
-                  onLocationSelect={handleLocationSelect}
-                />
+            {/* Mapa y coordenadas */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Seleccionar ubicación en el mapa
+                </label>
+                <div className="h-64 rounded-lg overflow-hidden border border-gray-300">
+                  <Map
+                    center={selectedLocation || [4.6097, -74.0817]}
+                    zoom={selectedLocation ? 15 : 6}
+                    onLocationSelect={handleLocationSelect}
+                  />
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  Haz clic en el mapa para marcar la ubicación exacta de tu
+                  mercado
+                </p>
               </div>
-              <p className="text-sm text-gray-500 mt-1">
-                Haz clic en el mapa para marcar la ubicación exacta de tu
-                mercado
-              </p>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Latitud <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.latitude}
+                    onChange={(e) =>
+                      setFormData({ ...formData, latitude: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                    placeholder="Ej: 4.6097"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Longitud <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.longitude}
+                    onChange={(e) =>
+                      setFormData({ ...formData, longitude: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                    placeholder="Ej: -74.0817"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block font-semibold text-green-900 mb-1">
-                  Latitud:
-                </label>
-                <input
-                  type="text"
-                  name="latitude"
-                  value={formData.latitude}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded p-2 text-gray-800"
-                  placeholder="Opcional"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-green-900 mb-1">
-                  Longitud:
-                </label>
-                <input
-                  type="text"
-                  name="longitude"
-                  value={formData.longitude}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded p-2 text-gray-800"
-                  placeholder="Opcional"
-                />
-              </div>
-            </div>
-
+            {/* Imagen del mercado */}
             <div>
-              <label className="block font-semibold text-green-900 mb-1">
-                Imagen del mercado:
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Imagen del mercado
               </label>
-              <input
-                type="file"
-                name="image"
-                accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files[0]) {
-                    setFormData({ ...formData, image: e.target.files[0] });
-                  }
-                }}
-                className="w-full border border-gray-300 rounded p-2 text-gray-800"
-              />
+              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-green-500 transition-colors">
+                <div className="space-y-1 text-center">
+                  {previewImage ? (
+                    <div className="relative w-48 h-48 mx-auto">
+                      <Image
+                        src={previewImage}
+                        alt="Vista previa"
+                        fill
+                        className="object-cover rounded-lg"
+                      />
+                    </div>
+                  ) : (
+                    <svg
+                      className="mx-auto h-12 w-12 text-gray-400"
+                      stroke="currentColor"
+                      fill="none"
+                      viewBox="0 0 48 48"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  )}
+                  <div className="flex text-sm text-gray-600">
+                    <label
+                      htmlFor="file-upload"
+                      className="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500"
+                    >
+                      <span>Subir imagen</span>
+                      <input
+                        id="file-upload"
+                        name="file-upload"
+                        type="file"
+                        className="sr-only"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        ref={fileInputRef}
+                      />
+                    </label>
+                    <p className="pl-1">o arrastrar y soltar</p>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    PNG, JPG, GIF hasta 5MB
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="flex space-x-4">

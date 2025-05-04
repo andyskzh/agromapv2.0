@@ -69,19 +69,26 @@ export default async function handler(req, res) {
           });
         }
 
-        const { name, location, description, managerId, latitude, longitude } =
-          fields;
+        const {
+          name,
+          location,
+          description,
+          managerId,
+          latitude,
+          longitude,
+          legalBeneficiary,
+        } = fields;
 
         if (!name || !location || !latitude || !longitude) {
           return res.status(400).json({
-            message: "El nombre, ubicación y coordenadas son campos requeridos",
+            message: "Nombre, ubicación y coordenadas son requeridos",
           });
         }
 
         // Si se proporciona un managerId, verificar que el usuario existe y es un MARKET_MANAGER
         if (managerId && managerId.length > 0) {
           const manager = await prisma.user.findUnique({
-            where: { id: managerId[0] }, // Tomar el primer elemento del array
+            where: { id: managerId[0] },
           });
 
           if (!manager || manager.role !== "MARKET_MANAGER") {
@@ -102,6 +109,7 @@ export default async function handler(req, res) {
           imageUrl = result.secure_url;
         }
 
+        // Crear el mercado
         const market = await prisma.market.create({
           data: {
             name: name.toString(),
@@ -111,6 +119,7 @@ export default async function handler(req, res) {
             longitude: parseFloat(longitude.toString()),
             managerId: managerId && managerId.length > 0 ? managerId[0] : null,
             image: imageUrl,
+            legalBeneficiary: legalBeneficiary?.toString() || null,
           },
           include: {
             manager: {
@@ -123,7 +132,10 @@ export default async function handler(req, res) {
           },
         });
 
-        res.status(201).json({ market });
+        return res.status(201).json({
+          message: "Mercado creado correctamente",
+          market: market,
+        });
       });
     } catch (error) {
       console.error("Error al crear mercado:", error);

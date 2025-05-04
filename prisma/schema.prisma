@@ -21,19 +21,20 @@ model User {
 }
 
 model Market {
-  id          String    @id @default(cuid())
-  name        String
-  description String?
-  location    String
-  latitude    Float
-  longitude   Float
-  image       String?
-  managerId   String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  manager     User      @relation(fields: [managerId], references: [id])
-  products    Product[]
-  comments    Comment[]
+  id              String    @id @default(cuid())
+  name            String
+  description     String?
+  location        String
+  latitude        Float
+  longitude       Float
+  image           String?
+  legalBeneficiary String?
+  managerId       String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  manager         User      @relation(fields: [managerId], references: [id])
+  products        Product[]
+  comments        Comment[]
 }
 
 model Product {

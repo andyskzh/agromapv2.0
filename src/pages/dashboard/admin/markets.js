@@ -26,6 +26,7 @@ export default function AdminMarketsPage() {
     latitude: "",
     longitude: "",
     image: null,
+    legalBeneficiary: "",
   });
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
@@ -148,21 +149,15 @@ export default function AdminMarketsPage() {
       formDataToSend.append("description", formData.description);
       formDataToSend.append("latitude", formData.latitude);
       formDataToSend.append("longitude", formData.longitude);
+      if (formData.legalBeneficiary) {
+        formDataToSend.append("legalBeneficiary", formData.legalBeneficiary);
+      }
       if (formData.managerId) {
         formDataToSend.append("managerId", formData.managerId);
       }
       if (fileInputRef.current?.files[0]) {
         formDataToSend.append("image", fileInputRef.current.files[0]);
       }
-
-      console.log("Enviando datos:", {
-        name: formData.name,
-        location: formData.location,
-        latitude: formData.latitude,
-        longitude: formData.longitude,
-        managerId: formData.managerId,
-        hasImage: !!fileInputRef.current?.files[0],
-      });
 
       const res = await fetch("/api/admin/markets", {
         method: "POST",
@@ -171,26 +166,33 @@ export default function AdminMarketsPage() {
 
       const data = await res.json();
 
-      if (res.ok) {
-        setShowForm(false);
-        setFormData({
-          name: "",
-          location: "",
-          description: "",
-          managerId: "",
-          latitude: "",
-          longitude: "",
-          image: null,
-        });
-        setPreviewImage(null);
-        setSelectedLocation(null);
-        fetchMarkets();
-      } else {
-        setError(data.message || "Error al crear el mercado");
+      if (!res.ok) {
+        throw new Error(data.message || "Error al crear el mercado");
       }
+
+      // Cerrar el modal y resetear el formulario
+      setShowForm(false);
+      setFormData({
+        name: "",
+        location: "",
+        description: "",
+        managerId: "",
+        latitude: "",
+        longitude: "",
+        image: null,
+        legalBeneficiary: "",
+      });
+      setPreviewImage(null);
+      setSelectedLocation(null);
+
+      // Actualizar la lista de mercados
+      fetchMarkets();
+
+      // Mostrar mensaje de éxito
+      alert("Mercado creado correctamente");
     } catch (err) {
       console.error("Error al crear mercado:", err);
-      setError("Error al crear el mercado");
+      setError(err.message || "Error al procesar la solicitud");
     }
   };
 
@@ -272,6 +274,23 @@ export default function AdminMarketsPage() {
                       required
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Beneficiario Legal
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.legalBeneficiary}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        legalBeneficiary: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
                 </div>
 
                 <div>

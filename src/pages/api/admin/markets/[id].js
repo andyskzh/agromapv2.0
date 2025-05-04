@@ -76,6 +76,7 @@ export default async function handler(req, res) {
             managerId,
             latitude,
             longitude,
+            legalBeneficiary,
           } = fields;
 
           if (!name || !location || !latitude || !longitude) {
@@ -131,6 +132,7 @@ export default async function handler(req, res) {
               managerId:
                 managerId && managerId.length > 0 ? managerId[0] : null,
               image: imageUrl,
+              legalBeneficiary: legalBeneficiary?.toString() || null,
             },
             include: {
               manager: {

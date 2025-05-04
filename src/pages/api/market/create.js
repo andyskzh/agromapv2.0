@@ -81,7 +81,7 @@ export default async function handler(req, res) {
         });
       }
 
-      const { name, location, description } = fields;
+      const { name, location, description, legalBeneficiary } = fields;
       const imageFile = files.image?.[0];
 
       if (!name || !location) {
@@ -120,6 +120,7 @@ export default async function handler(req, res) {
             longitude: parseFloat(fields.longitude.toString()),
             image: imageUrl,
             manager: { connect: { id: session.user.id } },
+            legalBeneficiary: legalBeneficiary?.toString() || null,
           },
         });
 

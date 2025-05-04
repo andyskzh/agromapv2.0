@@ -17,6 +17,7 @@ export default function CreateMarket() {
   const [description, setDescription] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+  const [legalBeneficiary, setLegalBeneficiary] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
@@ -60,6 +61,7 @@ export default function CreateMarket() {
       formData.append("description", description);
       formData.append("latitude", latitude);
       formData.append("longitude", longitude);
+      formData.append("legalBeneficiary", legalBeneficiary);
 
       // Agregar imagen si existe
       const imageFile = fileInputRef.current?.files[0];
@@ -103,6 +105,112 @@ export default function CreateMarket() {
           )}
 
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {/* Información básica */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-semibold text-gray-700 mb-2">
+                  Nombre del mercado *
+                </label>
+                <input
+                  type="text"
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  placeholder="Ej: Mercado Central de La Habana"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-gray-700 mb-2">
+                  Ubicación *
+                </label>
+                <input
+                  type="text"
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  required
+                  placeholder="Ej: Calle 23 #123, La Habana"
+                />
+              </div>
+            </div>
+
+            {/* Beneficiario Legal */}
+            <div>
+              <label className="block font-semibold text-gray-700 mb-2">
+                Beneficiario Legal
+              </label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                value={legalBeneficiary}
+                onChange={(e) => setLegalBeneficiary(e.target.value)}
+                placeholder="Nombre del beneficiario legal"
+              />
+            </div>
+
+            {/* Descripción */}
+            <div>
+              <label className="block font-semibold text-gray-700 mb-2">
+                Descripción
+              </label>
+              <textarea
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={4}
+                placeholder="Describe tu mercado, horarios, servicios especiales..."
+              />
+            </div>
+
+            {/* Mapa y coordenadas */}
+            <div className="space-y-4">
+              <div>
+                <label className="block font-semibold text-gray-700 mb-2">
+                  Seleccionar ubicación en el mapa
+                </label>
+                <div className="h-64 w-full rounded-lg overflow-hidden border border-gray-300">
+                  <Map
+                    selectedLocation={selectedLocation}
+                    onLocationSelect={handleLocationSelect}
+                  />
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  Haz clic en el mapa para marcar la ubicación exacta de tu
+                  mercado
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-2">
+                    Latitud
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    value={latitude}
+                    onChange={(e) => setLatitude(e.target.value)}
+                    placeholder="Ej: 19.4517"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-2">
+                    Longitud
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    value={longitude}
+                    onChange={(e) => setLongitude(e.target.value)}
+                    placeholder="Ej: -70.6970"
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Imagen del mercado */}
             <div>
               <label className="block font-semibold text-gray-700 mb-2">
@@ -158,97 +266,6 @@ export default function CreateMarket() {
                   </p>
                 </div>
               </div>
-            </div>
-
-            {/* Nombre del mercado */}
-            <div>
-              <label className="block font-semibold text-gray-700 mb-2">
-                Nombre del mercado *
-              </label>
-              <input
-                type="text"
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                placeholder="Ej: Mercado Central de La Habana"
-              />
-            </div>
-
-            {/* Ubicación */}
-            <div>
-              <label className="block font-semibold text-gray-700 mb-2">
-                Ubicación *
-              </label>
-              <input
-                type="text"
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                required
-                placeholder="Ej: Calle 23 #123, La Habana"
-              />
-            </div>
-
-            {/* Mapa */}
-            <div>
-              <label className="block font-semibold text-gray-700 mb-2">
-                Seleccionar ubicación en el mapa
-              </label>
-              <div className="h-64 w-full rounded-lg overflow-hidden border border-gray-300">
-                <Map
-                  selectedLocation={selectedLocation}
-                  onLocationSelect={handleLocationSelect}
-                />
-              </div>
-              <p className="text-sm text-gray-500 mt-1">
-                Haz clic en el mapa para marcar la ubicación exacta de tu
-                mercado
-              </p>
-            </div>
-
-            {/* Coordenadas */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block font-semibold text-gray-700 mb-2">
-                  Latitud
-                </label>
-                <input
-                  type="number"
-                  step="any"
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  value={latitude}
-                  onChange={(e) => setLatitude(e.target.value)}
-                  placeholder="Ej: 19.4517"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-gray-700 mb-2">
-                  Longitud
-                </label>
-                <input
-                  type="number"
-                  step="any"
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  value={longitude}
-                  onChange={(e) => setLongitude(e.target.value)}
-                  placeholder="Ej: -70.6970"
-                />
-              </div>
-            </div>
-
-            {/* Descripción */}
-            <div>
-              <label className="block font-semibold text-gray-700 mb-2">
-                Descripción
-              </label>
-              <textarea
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={4}
-                placeholder="Describe tu mercado, horarios, servicios especiales..."
-              />
             </div>
 
             <div className="flex space-x-4">

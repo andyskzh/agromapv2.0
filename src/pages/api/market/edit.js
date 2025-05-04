@@ -46,7 +46,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const { name, location, description } = fields;
+    const { name, location, description, legalBeneficiary } = fields;
     const imageFile = files.image?.[0];
 
     if (!name || !location) {
@@ -87,6 +87,7 @@ export default async function handler(req, res) {
           latitude: parseFloat(fields.latitude.toString()),
           longitude: parseFloat(fields.longitude.toString()),
           image: imageUrl,
+          legalBeneficiary: legalBeneficiary?.toString() || null,
         },
       });
 
