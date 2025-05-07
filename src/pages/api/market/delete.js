@@ -19,6 +19,13 @@ export default async function handler(req, res) {
     // Buscar el mercado del gestor
     const market = await prisma.market.findFirst({
       where: { managerId: session.user.id },
+      include: {
+        products: {
+          include: {
+            comments: true,
+          },
+        },
+      },
     });
 
     if (!market) {
@@ -27,13 +34,37 @@ export default async function handler(req, res) {
       });
     }
 
-    // Eliminar el mercado
+    // Eliminar todos los comentarios asociados a los productos del mercado
+    for (const product of market.products) {
+      await prisma.comment.deleteMany({
+        where: { productId: product.id },
+      });
+    }
+
+    // Eliminar todos los productos del mercado
+    await prisma.product.deleteMany({
+      where: { marketId: market.id },
+    });
+
+    // Eliminar los horarios del mercado
+    await prisma.marketSchedule.deleteMany({
+      where: { marketId: market.id },
+    });
+
+    // Finalmente, eliminar el mercado
     await prisma.market.delete({
       where: { id: market.id },
     });
 
     return res.status(200).json({
       message: "Mercado eliminado correctamente",
+      deletedItems: {
+        products: market.products.length,
+        comments: market.products.reduce(
+          (acc, product) => acc + product.comments.length,
+          0
+        ),
+      },
     });
   } catch (error) {
     console.error("Error al eliminar el mercado:", error);

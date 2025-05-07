@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { FaStore, FaCheckCircle, FaTimesCircle, FaStar } from "react-icons/fa";
 
-export default function MarketProductCard({ product }) {
+export default function MarketProductCard({ product, hideMarket = false }) {
   const router = useRouter();
   const isAvailable = product.isAvailable !== false; // Si no está definido, asumimos que está disponible
 
@@ -31,14 +31,16 @@ export default function MarketProductCard({ product }) {
       />
       <h4 className="text-lg font-bold mb-2 text-gray-700">{product.name}</h4>
 
-      <div className="text-sm mb-2">
-        <div className="flex items-center justify-center text-gray-600">
-          <FaStore className="mr-1" />
-          <span className="font-medium">
-            {product.market?.name || "Mercado no especificado"}
-          </span>
+      {!hideMarket && (
+        <div className="text-sm mb-2">
+          <div className="flex items-center justify-center text-gray-600">
+            <FaStore className="mr-1" />
+            <span className="font-medium">
+              {product.market?.name || "Mercado no especificado"}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Precio */}
       <div className="text-lg font-bold text-green-600 mb-2">
@@ -59,7 +61,7 @@ export default function MarketProductCard({ product }) {
             ))}
           </div>
           <span className="ml-1 text-sm text-gray-600">
-            ({averageRating.toFixed(1)})
+            ({Number(averageRating).toFixed(1)})
           </span>
         </div>
       )}

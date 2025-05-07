@@ -68,13 +68,23 @@ export default function ManagerDashboard() {
   };
 
   const handleDelete = async () => {
-    if (
-      !confirm(
-        "¿Estás seguro de que deseas eliminar este mercado? Esta acción no se puede deshacer."
-      )
-    ) {
+    // Obtener información del mercado antes de eliminarlo
+    const marketResponse = await fetch("/api/market/my");
+    const marketData = await marketResponse.json();
+
+    if (!marketData.market) {
+      setError("No se pudo obtener la información del mercado");
       return;
     }
+
+    const market = marketData.market;
+    const hasProducts = market.products && market.products.length > 0;
+
+    const confirmMessage = hasProducts
+      ? `¿Estás seguro de que deseas eliminar este mercado?\n\nEsta acción eliminará:\n- ${market.products.length} productos\n- Todos los comentarios asociados\n- Todos los horarios configurados\n\nEsta acción no se puede deshacer.`
+      : "¿Estás seguro de que deseas eliminar este mercado?";
+
+    if (!confirm(confirmMessage)) return;
 
     setLoading(true);
     setError("");
@@ -88,6 +98,12 @@ export default function ManagerDashboard() {
 
       if (!response.ok) {
         throw new Error(data.message || "Error al eliminar el mercado");
+      }
+
+      if (data.deletedItems) {
+        alert(
+          `Mercado eliminado correctamente.\nSe eliminaron:\n- ${data.deletedItems.products} productos\n- ${data.deletedItems.comments} comentarios`
+        );
       }
 
       router.push("/dashboard/manager/create");

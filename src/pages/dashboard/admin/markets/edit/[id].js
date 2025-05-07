@@ -581,8 +581,8 @@ export default function EditMarketAdmin() {
 
             <div className="h-64 rounded-lg overflow-hidden border border-gray-300">
               <Map
-                center={selectedLocation || [4.6097, -74.0817]}
-                zoom={selectedLocation ? 15 : 6}
+                center={selectedLocation || [22.0749, -79.8007]}
+                zoom={selectedLocation ? 15 : 9}
                 onLocationSelect={handleLocationSelect}
               />
             </div>

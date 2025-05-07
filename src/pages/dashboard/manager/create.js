@@ -389,7 +389,8 @@ export default function CreateMarket() {
                 </label>
                 <div className="h-64 w-full rounded-lg overflow-hidden border border-gray-300">
                   <Map
-                    selectedLocation={selectedLocation}
+                    center={selectedLocation || [22.0749, -79.8007]}
+                    zoom={selectedLocation ? 15 : 9}
                     onLocationSelect={handleLocationSelect}
                   />
                 </div>

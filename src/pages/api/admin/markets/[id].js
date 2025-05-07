@@ -201,10 +201,54 @@ export default async function handler(req, res) {
 
     case "DELETE":
       try {
+        // Obtener información del mercado antes de eliminarlo
+        const market = await prisma.market.findUnique({
+          where: { id },
+          include: {
+            products: {
+              include: {
+                comments: true,
+              },
+            },
+          },
+        });
+
+        if (!market) {
+          return res.status(404).json({ message: "Mercado no encontrado" });
+        }
+
+        // Eliminar todos los comentarios asociados a los productos del mercado
+        for (const product of market.products) {
+          await prisma.comment.deleteMany({
+            where: { productId: product.id },
+          });
+        }
+
+        // Eliminar todos los productos del mercado
+        await prisma.product.deleteMany({
+          where: { marketId: id },
+        });
+
+        // Eliminar los horarios del mercado
+        await prisma.marketSchedule.deleteMany({
+          where: { marketId: id },
+        });
+
+        // Finalmente, eliminar el mercado
         await prisma.market.delete({
           where: { id },
         });
-        return res.status(200).json({ message: "Mercado eliminado" });
+
+        return res.status(200).json({
+          message: "Mercado eliminado correctamente",
+          deletedItems: {
+            products: market.products.length,
+            comments: market.products.reduce(
+              (acc, product) => acc + product.comments.length,
+              0
+            ),
+          },
+        });
       } catch (error) {
         console.error("Error al eliminar mercado:", error);
         return res.status(500).json({ message: "Error al eliminar mercado" });

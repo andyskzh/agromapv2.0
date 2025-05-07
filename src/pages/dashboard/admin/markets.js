@@ -114,17 +114,30 @@ export default function AdminMarketsPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("¿Estás seguro de que deseas eliminar este mercado?")) return;
+    const market = markets.find((m) => m.id === id);
+    const hasProducts = market.products && market.products.length > 0;
+
+    const confirmMessage = hasProducts
+      ? `¿Estás seguro de que deseas eliminar este mercado?\n\nEsta acción eliminará:\n- ${market.products.length} productos\n- Todos los comentarios asociados\n- Todos los horarios configurados\n\nEsta acción no se puede deshacer.`
+      : "¿Estás seguro de que deseas eliminar este mercado?";
+
+    if (!confirm(confirmMessage)) return;
 
     try {
       const res = await fetch(`/api/admin/markets/${id}`, {
         method: "DELETE",
       });
 
+      const data = await res.json();
+
       if (res.ok) {
         setMarkets((prev) => prev.filter((m) => m.id !== id));
+        if (data.deletedItems) {
+          alert(
+            `Mercado eliminado correctamente.\nSe eliminaron:\n- ${data.deletedItems.products} productos\n- ${data.deletedItems.comments} comentarios`
+          );
+        }
       } else {
-        const data = await res.json();
         setError(data.message || "Error al eliminar el mercado");
       }
     } catch (err) {
@@ -618,8 +631,8 @@ export default function AdminMarketsPage() {
 
                 <div className="h-64 rounded-lg overflow-hidden border border-gray-300">
                   <Map
-                    center={[4.6097, -74.0817]}
-                    zoom={6}
+                    center={selectedLocation || [22.0749, -79.8007]}
+                    zoom={selectedLocation ? 15 : 9}
                     onLocationSelect={handleLocationSelect}
                   />
                 </div>

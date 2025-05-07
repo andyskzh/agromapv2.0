@@ -29,30 +29,18 @@ function LocationMarker({ onLocationSelect }) {
 }
 
 export default function Map({ selectedLocation, onLocationSelect }) {
-  const [center, setCenter] = useState([19.4326, -99.1332]); // Ciudad de México por defecto
+  const [center, setCenter] = useState([22.0749, -79.8007]); // Centro entre Sancti Spíritus y Villa Clara
 
   useEffect(() => {
     if (selectedLocation) {
       setCenter([selectedLocation.lat, selectedLocation.lng]);
-    } else {
-      // Intentar obtener la ubicación del usuario
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setCenter([position.coords.latitude, position.coords.longitude]);
-          },
-          (error) => {
-            console.error("Error al obtener la ubicación:", error);
-          }
-        );
-      }
     }
   }, [selectedLocation]);
 
   return (
     <MapContainer
       center={center}
-      zoom={13}
+      zoom={selectedLocation ? 15 : 9}
       style={{ height: "100%", width: "100%" }}
     >
       <TileLayer

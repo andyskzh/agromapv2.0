@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { PrismaClient } from "@prisma/client";
 import Image from "next/image";
+import MarketProductCard from "@/components/MarketProductCard";
 import {
   MapPinIcon,
   FunnelIcon,
@@ -22,6 +23,7 @@ export default function MarketDetails({ market: initialMarket }) {
     availability: "TODOS",
     sortBy: "NONE",
   });
+  const [isOpen, setIsOpen] = useState(false);
 
   console.log("Market recibido:", initialMarket);
 
@@ -30,6 +32,54 @@ export default function MarketDetails({ market: initialMarket }) {
       fetchProducts();
     }
   }, [router.query.id]);
+
+  useEffect(() => {
+    const checkIfOpen = () => {
+      if (!market.schedules || market.schedules.length === 0) {
+        setIsOpen(false);
+        return;
+      }
+
+      const now = new Date();
+      const currentDay = ["D", "L", "M", "X", "J", "V", "S"][now.getDay()];
+      const currentTime = now.toLocaleTimeString("es-ES", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+
+      // Buscar excepción para el día actual
+      const exception = market.schedules.find(
+        (s) => s.isException && s.day === currentDay
+      );
+
+      if (exception) {
+        // Si hay una excepción, usar esos horarios
+        setIsOpen(
+          currentTime >= exception.openTime &&
+            currentTime <= exception.closeTime
+        );
+        return;
+      }
+
+      // Si no hay excepción, buscar el horario regular
+      const regularSchedule = market.schedules.find((s) => !s.isException);
+      if (regularSchedule && regularSchedule.days.includes(currentDay)) {
+        setIsOpen(
+          currentTime >= regularSchedule.openTime &&
+            currentTime <= regularSchedule.closeTime
+        );
+        return;
+      }
+
+      setIsOpen(false);
+    };
+
+    checkIfOpen();
+    // Actualizar cada minuto
+    const interval = setInterval(checkIfOpen, 60000);
+    return () => clearInterval(interval);
+  }, [market]);
 
   const fetchProducts = async () => {
     try {
@@ -181,6 +231,16 @@ export default function MarketDetails({ market: initialMarket }) {
                   <div>
                     {market.schedules && market.schedules.length > 0 ? (
                       <div className="text-sm">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span
+                            className={`inline-block w-2 h-2 rounded-full ${
+                              isOpen ? "bg-green-500" : "bg-red-500"
+                            }`}
+                          />
+                          <span className="font-medium">
+                            {isOpen ? "Abierto" : "Cerrado"}
+                          </span>
+                        </div>
                         {(() => {
                           const horarios = {};
                           market.schedules.forEach((schedule) => {
@@ -234,23 +294,25 @@ export default function MarketDetails({ market: initialMarket }) {
         </div>
 
         {/* Título de Productos Disponibles */}
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          Productos Disponibles
-        </h2>
-
-        {/* Filtros */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div className="flex items-center mb-4">
-            <FunnelIcon className="h-5 w-5 text-gray-500 mr-2" />
-            <h2 className="text-lg font-semibold">Filtros</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">
+            Productos Disponibles
+          </h2>
+          <div className="flex items-center gap-2">
+            <FunnelIcon className="h-5 w-5 text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">Filtros</span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-            <div>
+        </div>
+
+        {/* Filtros en una sola línea */}
+        <div className="bg-white rounded-lg shadow-md p-4 mb-8">
+          <div className="flex flex-wrap gap-4 items-end">
+            <div className="flex-1 min-w-[200px]">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Categoría
               </label>
               <select
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm"
                 value={filters.category}
                 onChange={(e) =>
                   setFilters({ ...filters, category: e.target.value })
@@ -264,26 +326,26 @@ export default function MarketDetails({ market: initialMarket }) {
                 <option value="OTRO">Otros</option>
               </select>
             </div>
-            <div>
+            <div className="flex-1 min-w-[200px]">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Buscar
               </label>
               <input
                 type="text"
                 placeholder="Buscar productos..."
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm"
                 value={filters.searchTerm}
                 onChange={(e) =>
                   setFilters({ ...filters, searchTerm: e.target.value })
                 }
               />
             </div>
-            <div>
+            <div className="flex-1 min-w-[200px]">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Rango de Precio
               </label>
               <select
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm"
                 value={filters.priceRange}
                 onChange={(e) =>
                   setFilters({ ...filters, priceRange: e.target.value })
@@ -295,12 +357,12 @@ export default function MarketDetails({ market: initialMarket }) {
                 <option value="ALTO">Más de $100</option>
               </select>
             </div>
-            <div>
+            <div className="flex-1 min-w-[200px]">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Disponibilidad
               </label>
               <select
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm"
                 value={filters.availability}
                 onChange={(e) =>
                   setFilters({ ...filters, availability: e.target.value })
@@ -311,59 +373,23 @@ export default function MarketDetails({ market: initialMarket }) {
                 <option value="NO_DISPONIBLE">No disponibles</option>
               </select>
             </div>
-          </div>
-
-          {/* Filtros de ordenamiento */}
-          <div className="border-t pt-4">
-            <div className="flex items-center mb-2">
-              <StarIcon className="h-5 w-5 text-yellow-400 mr-2" />
-              <h3 className="text-md font-medium">Ordenar por</h3>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-              <button
-                onClick={() =>
-                  setFilters({ ...filters, sortBy: "RATING_DESC" })
+            <div className="flex-1 min-w-[200px]">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Ordenar por
+              </label>
+              <select
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm"
+                value={filters.sortBy}
+                onChange={(e) =>
+                  setFilters({ ...filters, sortBy: e.target.value })
                 }
-                className={`flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium ${
-                  filters.sortBy === "RATING_DESC"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
               >
-                <StarIcon className="h-4 w-4 mr-1" />
-                Mejor valorados
-              </button>
-              <button
-                onClick={() => setFilters({ ...filters, sortBy: "DATE_DESC" })}
-                className={`flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium ${
-                  filters.sortBy === "DATE_DESC"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                <ClockIcon className="h-4 w-4 mr-1" />
-                Más recientes
-              </button>
-              <button
-                onClick={() => setFilters({ ...filters, sortBy: "PRICE_ASC" })}
-                className={`flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium ${
-                  filters.sortBy === "PRICE_ASC"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                Precio: Menor a mayor
-              </button>
-              <button
-                onClick={() => setFilters({ ...filters, sortBy: "PRICE_DESC" })}
-                className={`flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium ${
-                  filters.sortBy === "PRICE_DESC"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                Precio: Mayor a menor
-              </button>
+                <option value="NONE">Sin ordenar</option>
+                <option value="RATING_DESC">Mejor valorados</option>
+                <option value="DATE_DESC">Más recientes</option>
+                <option value="PRICE_ASC">Precio: menor a mayor</option>
+                <option value="PRICE_DESC">Precio: mayor a menor</option>
+              </select>
             </div>
           </div>
         </div>
@@ -375,70 +401,13 @@ export default function MarketDetails({ market: initialMarket }) {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {sortedProducts.map((product) => (
-                <div
+                <MarketProductCard
                   key={product.id}
-                  className="bg-white p-4 rounded-lg shadow text-center hover:shadow-md transition-shadow"
-                >
-                  <div className="relative h-36 mb-4">
-                    {product.image ? (
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        className="object-contain"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <span className="text-gray-500">Sin imagen</span>
-                      </div>
-                    )}
-                  </div>
-                  <h4 className="text-lg font-bold mb-2 text-gray-700">
-                    {product.name}
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                    {product.description}
-                  </p>
-                  <div className="text-sm mb-3">
-                    <span
-                      className={`${
-                        product.isAvailable
-                          ? "text-green-600 font-medium"
-                          : "text-gray-300 line-through"
-                      }`}
-                    >
-                      Disponible
-                    </span>{" "}
-                    <span
-                      className={`${
-                        !product.isAvailable
-                          ? "text-red-500 font-medium"
-                          : "text-gray-300 line-through"
-                      }`}
-                    >
-                      No Disponible
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="text-green-600 font-semibold">
-                      ${product.price} / {product.priceType}
-                    </span>
-                    <div className="flex items-center">
-                      <StarIcon className="h-4 w-4 text-yellow-400 mr-1" />
-                      <span className="text-sm text-gray-600">
-                        {product.rating || "Sin valoraciones"}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => router.push(`/productos/${product.id}`)}
-                    className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition font-semibold w-full"
-                  >
-                    Ver Información
-                  </button>
-                </div>
+                  product={product}
+                  hideMarket={true}
+                />
               ))}
             </div>
 
