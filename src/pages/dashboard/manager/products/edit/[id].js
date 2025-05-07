@@ -20,6 +20,8 @@ export default function EditProduct() {
     sasProgram: false,
     baseProductId: "",
     image: "",
+    type: "",
+    nutrition: "",
   });
 
   const [baseProducts, setBaseProducts] = useState([]);
@@ -61,6 +63,8 @@ export default function EditProduct() {
           sasProgram: data.product.sasProgram,
           baseProductId: data.product.baseProductId || "",
           image: data.product.image || "",
+          type: data.product.type || "",
+          nutrition: data.product.nutrition || "",
         });
         if (data.product.image) {
           setPreviewImage(data.product.image);
@@ -128,6 +132,7 @@ export default function EditProduct() {
           description: `Información nutricional: ${selectedBaseProduct.nutrition}\n\n${form.description}`,
           category: selectedBaseProduct.category,
           image: selectedBaseProduct.image,
+          nutrition: selectedBaseProduct.nutrition,
         });
         setPreviewImage(selectedBaseProduct.image);
       }
@@ -275,10 +280,44 @@ export default function EditProduct() {
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
-                  {cat}
+                  {cat.replace("_", " ")}
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Tipo de Producto */}
+          <div>
+            <label className="block font-semibold text-green-900 mb-1">
+              Tipo de Producto
+            </label>
+            <input
+              type="text"
+              name="type"
+              value={form.type}
+              onChange={handleChange}
+              placeholder="Ej: Tomate cherry, Mango importado, etc."
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+            />
+          </div>
+
+          {/* Información Nutricional */}
+          <div>
+            <label className="block font-semibold text-green-900 mb-1">
+              Información Nutricional
+            </label>
+            <textarea
+              name="nutrition"
+              value={form.nutrition}
+              onChange={handleChange}
+              placeholder="Ingrese la información nutricional específica de este producto (opcional)"
+              rows={4}
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-800"
+            />
+            <p className="mt-1 text-sm text-gray-500">
+              Si no se especifica, se usará la información nutricional del
+              producto base.
+            </p>
           </div>
 
           {/* Descripción */}

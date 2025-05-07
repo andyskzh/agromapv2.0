@@ -84,6 +84,8 @@ export default async function handler(req, res) {
         marketId,
         baseProductId,
         image,
+        type,
+        nutrition,
         images = [],
       } = data;
 
@@ -124,17 +126,19 @@ export default async function handler(req, res) {
       const product = await prisma.product.create({
         data: {
           name,
-          description,
+          description: description || "",
           quantity: parseInt(quantity),
-          unit,
+          unit: unit || "kg",
           price: price ? parseFloat(price) : null,
-          priceType,
-          category,
-          isAvailable,
-          sasProgram,
+          priceType: priceType || "unidad",
+          category: category || "OTRO",
+          isAvailable: isAvailable === "true" || isAvailable === true,
+          sasProgram: sasProgram === "true" || sasProgram === true,
           marketId,
           baseProductId: baseProductId || null,
           image: image || null,
+          type: type || null,
+          nutrition: nutrition || null,
           images: images || [],
         },
       });

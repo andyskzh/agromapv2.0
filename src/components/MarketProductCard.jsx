@@ -31,6 +31,12 @@ export default function MarketProductCard({ product, hideMarket = false }) {
       />
       <h4 className="text-lg font-bold mb-2 text-gray-700">{product.name}</h4>
 
+      {product.type && (
+        <div className="text-sm text-gray-500 mb-2">
+          <span className="font-medium">Tipo:</span> {product.type}
+        </div>
+      )}
+
       {!hideMarket && (
         <div className="text-sm mb-2">
           <div className="flex items-center justify-center text-gray-600">

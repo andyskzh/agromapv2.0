@@ -61,6 +61,8 @@ export default async function handler(req, res) {
         marketId,
         baseProductId,
         image,
+        type,
+        nutrition,
       } = req.body;
 
       // Validar campos requeridos
@@ -112,6 +114,8 @@ export default async function handler(req, res) {
         marketId,
         baseProductId: baseProductId || null,
         image: image || null,
+        type: type || null,
+        nutrition: nutrition || null,
       };
 
       const updatedProduct = await prisma.product.update({

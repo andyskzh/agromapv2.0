@@ -327,6 +327,13 @@ export default function ProductoMercadoDetalle() {
             <h1 className="text-3xl font-bold text-gray-900">
               {producto.name}
             </h1>
+            {producto.type && (
+              <div className="mt-2 inline-block">
+                <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                  {producto.type}
+                </span>
+              </div>
+            )}
             <div className="mt-2 flex items-center text-gray-500">
               <MapPinIcon className="h-5 w-5 text-red-500 mr-2" />
               <span>{producto.market.name}</span>
@@ -562,13 +569,13 @@ export default function ProductoMercadoDetalle() {
                   >
                     Información Nutricional
                   </Dialog.Title>
-                  {producto.baseProduct.nutrition && (
-                    <div className="mt-4">
-                      <pre className="mt-2 whitespace-pre-wrap text-sm text-gray-600">
-                        {producto.baseProduct.nutrition}
-                      </pre>
-                    </div>
-                  )}
+                  <div className="mt-4">
+                    <pre className="mt-2 whitespace-pre-wrap text-sm text-gray-600">
+                      {producto.nutrition ||
+                        producto.baseProduct?.nutrition ||
+                        "No hay información nutricional disponible"}
+                    </pre>
+                  </div>
                   <div className="mt-4">
                     <button
                       type="button"

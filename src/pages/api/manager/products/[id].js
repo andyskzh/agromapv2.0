@@ -59,6 +59,8 @@ export default async function handler(req, res) {
         baseProductId,
         image,
         images = [],
+        type,
+        nutrition,
       } = req.body;
 
       // Validar campos requeridos
@@ -88,6 +90,8 @@ export default async function handler(req, res) {
           baseProductId: baseProductId || null,
           image: image || null,
           images: images || [],
+          type: type || null,
+          nutrition: nutrition || null,
         },
       });
 

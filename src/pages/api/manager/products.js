@@ -136,6 +136,8 @@ export default async function handler(req, res) {
         baseProductId,
         image,
         images = [],
+        type,
+        nutrition,
       } = data;
 
       // Validar campos requeridos
@@ -163,10 +165,12 @@ export default async function handler(req, res) {
           category,
           isAvailable,
           sasProgram,
-          marketId: market.id, // Usar el ID del mercado del gestor
+          marketId: market.id,
           baseProductId: baseProductId || null,
           image: image || null,
           images: images || [],
+          type: type || null,
+          nutrition: nutrition || null,
         },
       });
 
