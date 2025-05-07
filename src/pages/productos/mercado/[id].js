@@ -341,6 +341,18 @@ export default function ProductoMercadoDetalle() {
               <div className="text-sm text-gray-500 mt-1">
                 Disponible: {producto.quantity} {producto.unit}
               </div>
+              {producto.sasProgram && (
+                <div className="mt-4 flex items-center gap-4">
+                  <img
+                    src="/sas-cuba.png"
+                    alt="Logo SAS"
+                    className="h-12 w-auto"
+                  />
+                  <span className="text-base font-semibold text-gray-700">
+                    Producto potenciado por el programa SAS-Cuba
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Botón de Información Nutricional */}
