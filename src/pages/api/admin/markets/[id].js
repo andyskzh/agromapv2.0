@@ -40,6 +40,7 @@ export default async function handler(req, res) {
                 username: true,
               },
             },
+            schedules: true,
           },
         });
 
@@ -77,6 +78,7 @@ export default async function handler(req, res) {
             latitude,
             longitude,
             legalBeneficiary,
+            schedule,
           } = fields;
 
           if (!name || !location || !latitude || !longitude) {
@@ -144,6 +146,47 @@ export default async function handler(req, res) {
               },
             },
           });
+
+          // Actualizar los horarios
+          if (schedule) {
+            const parsedSchedule = JSON.parse(schedule.toString());
+
+            // Eliminar horarios existentes
+            await prisma.marketSchedule.deleteMany({
+              where: { marketId: id },
+            });
+
+            // Crear el horario base
+            await prisma.marketSchedule.create({
+              data: {
+                marketId: id,
+                openTime: parsedSchedule.openTime,
+                closeTime: parsedSchedule.closeTime,
+                days: parsedSchedule.days,
+                isException: false,
+              },
+            });
+
+            // Crear las excepciones si existen
+            if (
+              parsedSchedule.exceptions &&
+              parsedSchedule.exceptions.length > 0
+            ) {
+              await Promise.all(
+                parsedSchedule.exceptions.map((exception) =>
+                  prisma.marketSchedule.create({
+                    data: {
+                      marketId: id,
+                      day: exception.day,
+                      openTime: exception.openTime,
+                      closeTime: exception.closeTime,
+                      isException: true,
+                    },
+                  })
+                )
+              );
+            }
+          }
 
           return res.status(200).json({
             message: "Mercado actualizado correctamente",

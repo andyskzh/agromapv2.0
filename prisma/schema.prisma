@@ -35,6 +35,7 @@ model Market {
   manager         User      @relation(fields: [managerId], references: [id])
   products        Product[]
   comments        Comment[]
+  schedules       MarketSchedule[]
 }
 
 model Product {
@@ -83,6 +84,19 @@ model Comment {
   product       Product  @relation(fields: [productId], references: [id])
   user          User     @relation(fields: [userId], references: [id])
   market        Market   @relation(fields: [marketId], references: [id])
+}
+
+model MarketSchedule {
+  id          String   @id @default(cuid())
+  marketId    String
+  day         String?  // Para excepciones específicas
+  days        String[] // Para horario regular
+  openTime    String
+  closeTime   String
+  isException Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  market      Market   @relation(fields: [marketId], references: [id], onDelete: Cascade)
 }
 
 enum Role {

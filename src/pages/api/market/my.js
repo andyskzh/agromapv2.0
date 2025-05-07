@@ -14,6 +14,9 @@ export default async function handler(req, res) {
   try {
     const market = await prisma.market.findFirst({
       where: { managerId: session.user.id },
+      include: {
+        schedules: true,
+      },
     });
 
     return res.status(200).json({ market });

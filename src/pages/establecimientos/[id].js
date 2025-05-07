@@ -23,6 +23,8 @@ export default function MarketDetails({ market: initialMarket }) {
     sortBy: "NONE",
   });
 
+  console.log("Market recibido:", initialMarket);
+
   useEffect(() => {
     if (router.query.id) {
       fetchProducts();
@@ -34,12 +36,14 @@ export default function MarketDetails({ market: initialMarket }) {
       setLoading(true);
       const res = await fetch(`/api/markets/${router.query.id}/products`);
       const data = await res.json();
+      console.log("Productos recibidos:", data);
       if (res.ok) {
         setProducts(data.products);
       } else {
         setError(data.message);
       }
     } catch (err) {
+      console.error("Error al cargar productos:", err);
       setError("Error al cargar los productos del mercado");
     } finally {
       setLoading(false);
@@ -174,7 +178,45 @@ export default function MarketDetails({ market: initialMarket }) {
 
                 <div className="flex items-center">
                   <ClockIcon className="h-5 w-5 text-gray-400 mr-2" />
-                  <span>8:00 am a 5:00 pm</span>
+                  <div>
+                    {market.schedules && market.schedules.length > 0 ? (
+                      <div className="text-sm">
+                        {(() => {
+                          const horarios = {};
+                          market.schedules.forEach((schedule) => {
+                            const key = `${schedule.openTime}-${schedule.closeTime}`;
+                            if (!horarios[key]) {
+                              horarios[key] = {
+                                days: [],
+                                openTime: schedule.openTime,
+                                closeTime: schedule.closeTime,
+                              };
+                            }
+                            if (schedule.isException) {
+                              horarios[key].days.push(schedule.day);
+                            } else {
+                              horarios[key].days.push(...schedule.days);
+                            }
+                          });
+
+                          return Object.values(horarios).map(
+                            (horario, index) => (
+                              <div key={index} className="text-gray-600">
+                                <span className="font-medium text-gray-700">
+                                  {horario.days.join(", ")}:
+                                </span>{" "}
+                                {horario.openTime} - {horario.closeTime}
+                              </div>
+                            )
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      <span className="text-gray-500 text-sm">
+                        Horario no especificado
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {market.description && (
@@ -414,6 +456,8 @@ export default function MarketDetails({ market: initialMarket }) {
 
 export async function getServerSideProps({ params }) {
   const prisma = new PrismaClient();
+  console.log("ID recibido en getServerSideProps:", params.id);
+
   try {
     const market = await prisma.market.findUnique({
       where: { id: params.id },
@@ -428,8 +472,21 @@ export async function getServerSideProps({ params }) {
         createdAt: true,
         updatedAt: true,
         legalBeneficiary: true,
+        schedules: {
+          select: {
+            id: true,
+            marketId: true,
+            day: true,
+            days: true,
+            openTime: true,
+            closeTime: true,
+            isException: true,
+          },
+        },
       },
     });
+
+    console.log("Mercado encontrado en getServerSideProps:", market);
 
     if (!market) {
       return {
@@ -450,7 +507,7 @@ export async function getServerSideProps({ params }) {
       },
     };
   } catch (error) {
-    console.error("Error fetching market:", error);
+    console.error("Error en getServerSideProps:", error);
     return {
       props: {
         market: null,

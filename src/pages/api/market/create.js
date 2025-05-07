@@ -81,7 +81,8 @@ export default async function handler(req, res) {
         });
       }
 
-      const { name, location, description, legalBeneficiary } = fields;
+      const { name, location, description, legalBeneficiary, schedule } =
+        fields;
       const imageFile = files.image?.[0];
 
       if (!name || !location) {
@@ -123,6 +124,42 @@ export default async function handler(req, res) {
             legalBeneficiary: legalBeneficiary?.toString() || null,
           },
         });
+
+        // Crear los horarios si existen
+        if (schedule) {
+          const parsedSchedule = JSON.parse(schedule.toString());
+
+          // Crear el horario base
+          await prisma.marketSchedule.create({
+            data: {
+              marketId: market.id,
+              openTime: parsedSchedule.openTime,
+              closeTime: parsedSchedule.closeTime,
+              days: parsedSchedule.days,
+              isException: false,
+            },
+          });
+
+          // Crear las excepciones si existen
+          if (
+            parsedSchedule.exceptions &&
+            parsedSchedule.exceptions.length > 0
+          ) {
+            await Promise.all(
+              parsedSchedule.exceptions.map((exception) =>
+                prisma.marketSchedule.create({
+                  data: {
+                    marketId: market.id,
+                    day: exception.day,
+                    openTime: exception.openTime,
+                    closeTime: exception.closeTime,
+                    isException: true,
+                  },
+                })
+              )
+            );
+          }
+        }
 
         return res.status(201).json({
           message: "Mercado creado exitosamente",

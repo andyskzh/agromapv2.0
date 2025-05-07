@@ -8,6 +8,7 @@ export default async function handler(req, res) {
   }
 
   const { id } = req.query;
+  console.log("Buscando mercado con ID:", id);
 
   try {
     const market = await prisma.market.findUnique({
@@ -18,8 +19,11 @@ export default async function handler(req, res) {
             comments: true,
           },
         },
+        schedules: true,
       },
     });
+
+    console.log("Resultado de la búsqueda:", market);
 
     if (!market) {
       return res.status(404).json({ message: "Mercado no encontrado" });
@@ -40,6 +44,11 @@ export default async function handler(req, res) {
       market: {
         ...market,
         products: productsWithRating,
+        schedules: market.schedules.map((schedule) => ({
+          ...schedule,
+          createdAt: schedule.createdAt.toISOString(),
+          updatedAt: schedule.updatedAt.toISOString(),
+        })),
       },
     });
   } catch (error) {

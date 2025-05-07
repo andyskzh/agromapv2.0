@@ -27,6 +27,12 @@ export default function AdminMarketsPage() {
     longitude: "",
     image: null,
     legalBeneficiary: "",
+    schedule: {
+      openTime: "08:00",
+      closeTime: "17:00",
+      days: [],
+      exceptions: [],
+    },
   });
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
@@ -158,6 +164,7 @@ export default function AdminMarketsPage() {
       if (fileInputRef.current?.files[0]) {
         formDataToSend.append("image", fileInputRef.current.files[0]);
       }
+      formDataToSend.append("schedule", JSON.stringify(formData.schedule));
 
       const res = await fetch("/api/admin/markets", {
         method: "POST",
@@ -181,6 +188,12 @@ export default function AdminMarketsPage() {
         longitude: "",
         image: null,
         legalBeneficiary: "",
+        schedule: {
+          openTime: "08:00",
+          closeTime: "17:00",
+          days: [],
+          exceptions: [],
+        },
       });
       setPreviewImage(null);
       setSelectedLocation(null);
@@ -291,6 +304,209 @@ export default function AdminMarketsPage() {
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Horario de Operación
+                  </label>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-1">
+                          Hora de Apertura
+                        </label>
+                        <input
+                          type="time"
+                          value={formData.schedule.openTime}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              schedule: {
+                                ...formData.schedule,
+                                openTime: e.target.value,
+                              },
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-1">
+                          Hora de Cierre
+                        </label>
+                        <input
+                          type="time"
+                          value={formData.schedule.closeTime}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              schedule: {
+                                ...formData.schedule,
+                                closeTime: e.target.value,
+                              },
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">
+                        Días de Operación
+                      </label>
+                      <div className="grid grid-cols-7 gap-2">
+                        {["L", "M", "X", "J", "V", "S", "D"].map((day) => (
+                          <button
+                            key={day}
+                            type="button"
+                            onClick={() => {
+                              const days = formData.schedule.days.includes(day)
+                                ? formData.schedule.days.filter(
+                                    (d) => d !== day
+                                  )
+                                : [...formData.schedule.days, day];
+                              setFormData({
+                                ...formData,
+                                schedule: {
+                                  ...formData.schedule,
+                                  days,
+                                },
+                              });
+                            }}
+                            className={`p-2 rounded-md ${
+                              formData.schedule.days.includes(day)
+                                ? "bg-green-500 text-white"
+                                : "bg-gray-100 text-gray-700"
+                            }`}
+                          >
+                            {day}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">
+                        Excepciones
+                      </label>
+                      <div className="space-y-2">
+                        {formData.schedule.exceptions.map(
+                          (exception, index) => (
+                            <div
+                              key={index}
+                              className="flex gap-2 items-center"
+                            >
+                              <select
+                                value={exception.day}
+                                onChange={(e) => {
+                                  const exceptions = [
+                                    ...formData.schedule.exceptions,
+                                  ];
+                                  exceptions[index].day = e.target.value;
+                                  setFormData({
+                                    ...formData,
+                                    schedule: {
+                                      ...formData.schedule,
+                                      exceptions,
+                                    },
+                                  });
+                                }}
+                                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                              >
+                                <option value="">Seleccionar día</option>
+                                <option value="L">Lunes</option>
+                                <option value="M">Martes</option>
+                                <option value="X">Miércoles</option>
+                                <option value="J">Jueves</option>
+                                <option value="V">Viernes</option>
+                                <option value="S">Sábado</option>
+                                <option value="D">Domingo</option>
+                              </select>
+                              <input
+                                type="time"
+                                value={exception.openTime}
+                                onChange={(e) => {
+                                  const exceptions = [
+                                    ...formData.schedule.exceptions,
+                                  ];
+                                  exceptions[index].openTime = e.target.value;
+                                  setFormData({
+                                    ...formData,
+                                    schedule: {
+                                      ...formData.schedule,
+                                      exceptions,
+                                    },
+                                  });
+                                }}
+                                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                              />
+                              <input
+                                type="time"
+                                value={exception.closeTime}
+                                onChange={(e) => {
+                                  const exceptions = [
+                                    ...formData.schedule.exceptions,
+                                  ];
+                                  exceptions[index].closeTime = e.target.value;
+                                  setFormData({
+                                    ...formData,
+                                    schedule: {
+                                      ...formData.schedule,
+                                      exceptions,
+                                    },
+                                  });
+                                }}
+                                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const exceptions =
+                                    formData.schedule.exceptions.filter(
+                                      (_, i) => i !== index
+                                    );
+                                  setFormData({
+                                    ...formData,
+                                    schedule: {
+                                      ...formData.schedule,
+                                      exceptions,
+                                    },
+                                  });
+                                }}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                Eliminar
+                              </button>
+                            </div>
+                          )
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({
+                              ...formData,
+                              schedule: {
+                                ...formData.schedule,
+                                exceptions: [
+                                  ...formData.schedule.exceptions,
+                                  {
+                                    day: "",
+                                    openTime: "08:00",
+                                    closeTime: "17:00",
+                                  },
+                                ],
+                              },
+                            });
+                          }}
+                          className="text-green-600 hover:text-green-800"
+                        >
+                          + Agregar Excepción
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div>

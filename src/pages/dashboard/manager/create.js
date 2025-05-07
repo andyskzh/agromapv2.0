@@ -12,12 +12,21 @@ const Map = dynamic(() => import("@/components/Map"), {
 export default function CreateMarket() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [location, setLocation] = useState("");
-  const [description, setDescription] = useState("");
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
-  const [legalBeneficiary, setLegalBeneficiary] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    location: "",
+    description: "",
+    latitude: "",
+    longitude: "",
+    image: null,
+    legalBeneficiary: "",
+    schedule: {
+      openTime: "08:00",
+      closeTime: "17:00",
+      days: [],
+      exceptions: [],
+    },
+  });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
@@ -45,8 +54,11 @@ export default function CreateMarket() {
 
   const handleLocationSelect = (lat, lng) => {
     setSelectedLocation({ lat, lng });
-    setLatitude(lat.toString());
-    setLongitude(lng.toString());
+    setFormData({
+      ...formData,
+      latitude: lat.toString(),
+      longitude: lng.toString(),
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -55,23 +67,24 @@ export default function CreateMarket() {
     setLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("location", location);
-      formData.append("description", description);
-      formData.append("latitude", latitude);
-      formData.append("longitude", longitude);
-      formData.append("legalBeneficiary", legalBeneficiary);
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("location", formData.location);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("latitude", formData.latitude);
+      formDataToSend.append("longitude", formData.longitude);
+      formDataToSend.append("legalBeneficiary", formData.legalBeneficiary);
+      formDataToSend.append("schedule", JSON.stringify(formData.schedule));
 
       // Agregar imagen si existe
       const imageFile = fileInputRef.current?.files[0];
       if (imageFile) {
-        formData.append("image", imageFile);
+        formDataToSend.append("image", imageFile);
       }
 
       const res = await fetch("/api/market/create", {
         method: "POST",
-        body: formData,
+        body: formDataToSend,
       });
 
       const data = await res.json();
@@ -114,8 +127,10 @@ export default function CreateMarket() {
                 <input
                   type="text"
                   className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   required
                   placeholder="Ej: Mercado Central de La Habana"
                 />
@@ -127,8 +142,10 @@ export default function CreateMarket() {
                 <input
                   type="text"
                   className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
+                  value={formData.location}
+                  onChange={(e) =>
+                    setFormData({ ...formData, location: e.target.value })
+                  }
                   required
                   placeholder="Ej: Calle 23 #123, La Habana"
                 />
@@ -143,10 +160,209 @@ export default function CreateMarket() {
               <input
                 type="text"
                 className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                value={legalBeneficiary}
-                onChange={(e) => setLegalBeneficiary(e.target.value)}
+                value={formData.legalBeneficiary}
+                onChange={(e) =>
+                  setFormData({ ...formData, legalBeneficiary: e.target.value })
+                }
                 placeholder="Nombre del beneficiario legal"
               />
+            </div>
+
+            {/* Horario de Operación */}
+            <div>
+              <label className="block font-semibold text-gray-700 mb-2">
+                Horario de Operación
+              </label>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      Hora de Apertura
+                    </label>
+                    <input
+                      type="time"
+                      value={formData.schedule.openTime}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          schedule: {
+                            ...formData.schedule,
+                            openTime: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      Hora de Cierre
+                    </label>
+                    <input
+                      type="time"
+                      value={formData.schedule.closeTime}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          schedule: {
+                            ...formData.schedule,
+                            closeTime: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">
+                    Días de Operación
+                  </label>
+                  <div className="grid grid-cols-7 gap-2">
+                    {["L", "M", "X", "J", "V", "S", "D"].map((day) => (
+                      <button
+                        key={day}
+                        type="button"
+                        onClick={() => {
+                          const days = formData.schedule.days.includes(day)
+                            ? formData.schedule.days.filter((d) => d !== day)
+                            : [...formData.schedule.days, day];
+                          setFormData({
+                            ...formData,
+                            schedule: {
+                              ...formData.schedule,
+                              days,
+                            },
+                          });
+                        }}
+                        className={`p-2 rounded-md ${
+                          formData.schedule.days.includes(day)
+                            ? "bg-green-500 text-white"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {day}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">
+                    Excepciones
+                  </label>
+                  <div className="space-y-2">
+                    {formData.schedule.exceptions.map((exception, index) => (
+                      <div key={index} className="flex gap-2 items-center">
+                        <select
+                          value={exception.day}
+                          onChange={(e) => {
+                            const exceptions = [
+                              ...formData.schedule.exceptions,
+                            ];
+                            exceptions[index].day = e.target.value;
+                            setFormData({
+                              ...formData,
+                              schedule: {
+                                ...formData.schedule,
+                                exceptions,
+                              },
+                            });
+                          }}
+                          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
+                          <option value="">Seleccionar día</option>
+                          <option value="L">Lunes</option>
+                          <option value="M">Martes</option>
+                          <option value="X">Miércoles</option>
+                          <option value="J">Jueves</option>
+                          <option value="V">Viernes</option>
+                          <option value="S">Sábado</option>
+                          <option value="D">Domingo</option>
+                        </select>
+                        <input
+                          type="time"
+                          value={exception.openTime}
+                          onChange={(e) => {
+                            const exceptions = [
+                              ...formData.schedule.exceptions,
+                            ];
+                            exceptions[index].openTime = e.target.value;
+                            setFormData({
+                              ...formData,
+                              schedule: {
+                                ...formData.schedule,
+                                exceptions,
+                              },
+                            });
+                          }}
+                          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                        <input
+                          type="time"
+                          value={exception.closeTime}
+                          onChange={(e) => {
+                            const exceptions = [
+                              ...formData.schedule.exceptions,
+                            ];
+                            exceptions[index].closeTime = e.target.value;
+                            setFormData({
+                              ...formData,
+                              schedule: {
+                                ...formData.schedule,
+                                exceptions,
+                              },
+                            });
+                          }}
+                          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const exceptions =
+                              formData.schedule.exceptions.filter(
+                                (_, i) => i !== index
+                              );
+                            setFormData({
+                              ...formData,
+                              schedule: {
+                                ...formData.schedule,
+                                exceptions,
+                              },
+                            });
+                          }}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          schedule: {
+                            ...formData.schedule,
+                            exceptions: [
+                              ...formData.schedule.exceptions,
+                              {
+                                day: "",
+                                openTime: "08:00",
+                                closeTime: "17:00",
+                              },
+                            ],
+                          },
+                        });
+                      }}
+                      className="text-green-600 hover:text-green-800"
+                    >
+                      + Agregar Excepción
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Descripción */}
@@ -156,15 +372,17 @@ export default function CreateMarket() {
               </label>
               <textarea
                 className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 rows={4}
                 placeholder="Describe tu mercado, horarios, servicios especiales..."
               />
             </div>
 
             {/* Mapa y coordenadas */}
-            <div className="space-y-4">
+            <div>
               <div>
                 <label className="block font-semibold text-gray-700 mb-2">
                   Seleccionar ubicación en el mapa
@@ -181,7 +399,7 @@ export default function CreateMarket() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 mt-4">
                 <div>
                   <label className="block font-semibold text-gray-700 mb-2">
                     Latitud
@@ -190,8 +408,10 @@ export default function CreateMarket() {
                     type="number"
                     step="any"
                     className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    value={latitude}
-                    onChange={(e) => setLatitude(e.target.value)}
+                    value={formData.latitude}
+                    onChange={(e) =>
+                      setFormData({ ...formData, latitude: e.target.value })
+                    }
                     placeholder="Ej: 19.4517"
                   />
                 </div>
@@ -203,15 +423,17 @@ export default function CreateMarket() {
                     type="number"
                     step="any"
                     className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    value={longitude}
-                    onChange={(e) => setLongitude(e.target.value)}
+                    value={formData.longitude}
+                    onChange={(e) =>
+                      setFormData({ ...formData, longitude: e.target.value })
+                    }
                     placeholder="Ej: -70.6970"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Imagen del mercado */}
+            {/* Imagen */}
             <div>
               <label className="block font-semibold text-gray-700 mb-2">
                 Imagen del mercado
