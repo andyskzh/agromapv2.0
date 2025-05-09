@@ -25,6 +25,34 @@ export default function MarketDetails({ market: initialMarket }) {
   });
   const [isOpen, setIsOpen] = useState(false);
 
+  const CATEGORIES = [
+    "TODOS",
+    "HORTALIZA",
+    "FRUTA",
+    "VIANDA_TUBERCULO",
+    "GRANO_CEREAL",
+    "CARNE_EMBUTIDO",
+    "LACTEO_DERIVADO",
+    "HUEVO_PRODUCTO_ANIMAL",
+    "HIERBA_ESPECIA_CONDIMENTO",
+    "PROCESADO_CONSERVA_ARTESANAL",
+    "OTRO",
+  ];
+
+  const CATEGORY_NAMES = {
+    TODOS: "Todas las categorías",
+    HORTALIZA: "Hortalizas",
+    FRUTA: "Frutas",
+    VIANDA_TUBERCULO: "Viandas y Tubérculos",
+    GRANO_CEREAL: "Granos y Cereales",
+    CARNE_EMBUTIDO: "Carnes y Embutidos",
+    LACTEO_DERIVADO: "Lácteos y Derivados",
+    HUEVO_PRODUCTO_ANIMAL: "Huevos y Otros Productos Animales",
+    HIERBA_ESPECIA_CONDIMENTO: "Hierbas, Especias y Condimentos",
+    PROCESADO_CONSERVA_ARTESANAL: "Procesados y Conservas Artesanales",
+    OTRO: "Otros",
+  };
+
   console.log("Market recibido:", initialMarket);
 
   useEffect(() => {
@@ -318,12 +346,11 @@ export default function MarketDetails({ market: initialMarket }) {
                   setFilters({ ...filters, category: e.target.value })
                 }
               >
-                <option value="TODOS">Todas las categorías</option>
-                <option value="FRUTA">Frutas</option>
-                <option value="HORTALIZA">Hortalizas</option>
-                <option value="VIANDA">Viandas</option>
-                <option value="CARNE_EMBUTIDO">Carnes y Embutidos</option>
-                <option value="OTRO">Otros</option>
+                {CATEGORIES.map((category) => (
+                  <option key={category} value={category}>
+                    {CATEGORY_NAMES[category]}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="flex-1 min-w-[200px]">

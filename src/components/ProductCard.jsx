@@ -65,8 +65,7 @@ export default function ProductCard({ product }) {
               Producto no disponible
             </h3>
             <p className="text-gray-600 mb-4">
-              Este producto aún no está disponible en ningún mercado. Te
-              notificaremos cuando algún mercado lo agregue a su catálogo.
+              Este producto aún no está disponible en ningún mercado.
             </p>
             <div className="flex justify-end">
               <button

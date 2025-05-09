@@ -46,7 +46,18 @@ export default function CreateProductManager() {
 
   const UNITS = ["kg", "lb", "unidad"];
   const PRICE_TYPES = ["unidad", "lb"];
-  const CATEGORIES = ["FRUTA", "HORTALIZA", "VIANDA", "CARNE_EMBUTIDO", "OTRO"];
+  const CATEGORIES = [
+    "HORTALIZA",
+    "FRUTA",
+    "VIANDA_TUBERCULO",
+    "GRANO_CEREAL",
+    "CARNE_EMBUTIDO",
+    "LACTEO_DERIVADO",
+    "HUEVO_PRODUCTO_ANIMAL",
+    "HIERBA_ESPECIA_CONDIMENTO",
+    "PROCESADO_CONSERVA_ARTESANAL",
+    "OTRO",
+  ];
 
   useEffect(() => {
     if (

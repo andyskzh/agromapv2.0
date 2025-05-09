@@ -11,10 +11,16 @@ import {
 } from "@heroicons/react/24/outline";
 
 const CATEGORY_NAMES = {
-  fruta: "Frutas",
   hortaliza: "Hortalizas",
-  vianda: "Viandas",
+  fruta: "Frutas",
+  vianda_tuberculo: "Viandas y Tubérculos",
+  grano_cereal: "Granos y Cereales",
   carne_embutido: "Carnes y Embutidos",
+  lacteo_derivado: "Lácteos y Derivados",
+  miel: "Miel",
+  huevo_producto_animal: "Huevos y Otros Productos Animales",
+  hierba_especia_condimento: "Hierbas, Especias y Condimentos",
+  procesado_conserva_artesanal: "Procesados y Conservas Artesanales",
   otro: "Otros",
 };
 

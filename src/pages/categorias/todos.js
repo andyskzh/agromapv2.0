@@ -29,10 +29,24 @@ export default function AllProductsPage() {
 
   const categories = [
     { key: "TODOS", label: "Todas las categorías" },
-    { key: "FRUTA", label: "Frutas" },
     { key: "HORTALIZA", label: "Hortalizas" },
-    { key: "VIANDA", label: "Viandas" },
+    { key: "FRUTA", label: "Frutas" },
+    { key: "VIANDA_TUBERCULO", label: "Viandas y Tubérculos" },
+    { key: "GRANO_CEREAL", label: "Granos y Cereales" },
     { key: "CARNE_EMBUTIDO", label: "Carnes y Embutidos" },
+    { key: "LACTEO_DERIVADO", label: "Lácteos y Derivados" },
+    {
+      key: "HUEVO_PRODUCTO_ANIMAL",
+      label: "Huevos y Otros Productos Animales",
+    },
+    {
+      key: "HIERBA_ESPECIA_CONDIMENTO",
+      label: "Hierbas, Especias y Condimentos",
+    },
+    {
+      key: "PROCESADO_CONSERVA_ARTESANAL",
+      label: "Procesados y Conservas Artesanales",
+    },
     { key: "OTRO", label: "Otros" },
   ];
 

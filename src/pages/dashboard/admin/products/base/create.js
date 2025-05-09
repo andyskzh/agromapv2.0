@@ -16,7 +16,18 @@ export default function CreateBaseProductAdmin() {
   const [loading, setLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
 
-  const CATEGORIES = ["FRUTA", "HORTALIZA", "VIANDA", "CARNE_EMBUTIDO", "OTRO"];
+  const CATEGORIES = [
+    "HORTALIZA",
+    "FRUTA",
+    "VIANDA_TUBERCULO",
+    "GRANO_CEREAL",
+    "CARNE_EMBUTIDO",
+    "LACTEO_DERIVADO",
+    "HUEVO_PRODUCTO_ANIMAL",
+    "HIERBA_ESPECIA_CONDIMENTO",
+    "PROCESADO_CONSERVA_ARTESANAL",
+    "OTRO",
+  ];
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;

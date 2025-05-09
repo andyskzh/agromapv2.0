@@ -19,7 +19,18 @@ export default function EditBaseProductAdmin() {
   const [success, setSuccess] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
 
-  const CATEGORIES = ["FRUTA", "HORTALIZA", "VIANDA", "CARNE_EMBUTIDO", "OTRO"];
+  const CATEGORIES = [
+    "HORTALIZA",
+    "FRUTA",
+    "VIANDA_TUBERCULO",
+    "GRANO_CEREAL",
+    "CARNE_EMBUTIDO",
+    "LACTEO_DERIVADO",
+    "HUEVO_PRODUCTO_ANIMAL",
+    "HIERBA_ESPECIA_CONDIMENTO",
+    "PROCESADO_CONSERVA_ARTESANAL",
+    "OTRO",
+  ];
 
   useEffect(() => {
     if (session?.user?.role !== "ADMIN") {

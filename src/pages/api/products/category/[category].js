@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   // Convertir la categoría de la URL a mayúsculas para coincidir con el enum
-  const categoryEnum = category.toUpperCase();
+  const categoryEnum = category.toUpperCase().replace(/-/g, "_");
 
   try {
     const products = await prisma.product.findMany({
